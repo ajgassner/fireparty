@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataService implements IDataService {
 
-	private static final String SPACES = StringUtils.repeat("", 50);
+	private static final String SPACES = StringUtils.repeat(StringUtils.SPACE, 50);
 	private static final int PDF_MARGIN = 30;
 	private static final String TIME_SEPARATOR = " - ";
 
