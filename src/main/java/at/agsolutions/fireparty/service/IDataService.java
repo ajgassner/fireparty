@@ -23,4 +23,6 @@ public interface IDataService {
 	void load(File file) throws IOException, ClassNotFoundException;
 
 	void generatePdf(List<Disposition> dispositions, File file) throws IOException;
+
+	void generateExcel(List<Disposition> dispositions, File file) throws IOException;
 }

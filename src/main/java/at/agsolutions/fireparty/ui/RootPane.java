@@ -158,11 +158,11 @@ public class RootPane extends BorderPane {
 			}
 		});
 
-		MenuItem pdf = new MenuItem("Generate PDF");
+		MenuItem pdf = new MenuItem("Generate overview PDF");
 		pdf.setOnAction(e -> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF files (*.pdf)", "*.pdf"));
-			fileChooser.setTitle("Save PDF file");
+			fileChooser.setTitle("Save overview PDF file");
 			try {
 				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 				if (file != null) {
@@ -170,11 +170,27 @@ public class RootPane extends BorderPane {
 					), file);
 				}
 			} catch (IOException ex) {
-				showError("Failed to generate PDF");
+				showError("Failed to generate overview PDF");
 			}
 		});
 
-		menuFile.getItems().addAll(save, load, pdf, exit);
+		MenuItem excel = new MenuItem("Generate overview Excel");
+		excel.setOnAction(e -> {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel files (*.xlsx)", "*.xlsx"));
+			fileChooser.setTitle("Save overview Excel file");
+			try {
+				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
+				if (file != null) {
+					dataService.generateExcel(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
+					), file);
+				}
+			} catch (IOException ex) {
+				showError("Failed to generate overview PDF");
+			}
+		});
+
+		menuFile.getItems().addAll(save, load, pdf, excel, exit);
 		menuBar.getMenus().add(menuFile);
 
 		setTop(menuBar);

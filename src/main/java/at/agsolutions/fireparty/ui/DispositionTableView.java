@@ -16,8 +16,6 @@ import javafx.scene.input.*;
 import javafx.util.converter.LocalTimeStringConverter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.helpers.FormattingTuple;
-import org.slf4j.helpers.MessageFormatter;
 
 import java.time.LocalTime;
 import java.time.format.FormatStyle;
@@ -123,12 +121,6 @@ public class DispositionTableView extends TableView<Disposition> {
 		fromCol.setOnEditCommit(e -> {
 			boolean commit = true;
 
-			// From has to be lower than to
-			if (e.getNewValue().isAfter(e.getRowValue().getTo()) || e.getNewValue().equals(e.getRowValue().getTo())) {
-				commit = false;
-				showWrongTimeSelection(e.getNewValue(), e.getRowValue().getTo());
-			}
-
 			// row exists in table
 			if (getItems().contains(new Disposition(e.getRowValue().getPerson(), e.getRowValue().getLocation(), e.getNewValue(), e
 					.getRowValue().getTo()))) {
@@ -162,12 +154,6 @@ public class DispositionTableView extends TableView<Disposition> {
 		toCol.setOnEditCommit(e -> {
 			boolean commit = true;
 
-			// To has to be grater than from
-			if (e.getNewValue().isBefore(e.getRowValue().getFrom()) || e.getNewValue().equals(e.getRowValue().getFrom())) {
-				commit = false;
-				showWrongTimeSelection(e.getRowValue().getFrom(), e.getNewValue());
-			}
-
 			// row exists in table
 			if (getItems().contains(new Disposition(e.getRowValue().getPerson(), e.getRowValue().getLocation(), e.getRowValue().getFrom()
 					, e.getNewValue()))) {
@@ -194,12 +180,6 @@ public class DispositionTableView extends TableView<Disposition> {
 	private void showIntegrityWarning() {
 		log.warn("The person is already planned for this time and location.");
 		showWarning("The person is already planned for this time and location.");
-	}
-
-	private void showWrongTimeSelection(LocalTime from, LocalTime to) {
-		FormattingTuple message = MessageFormatter.format("The timespan {} to {} is invalid", from, to);
-		log.warn(message.getMessage());
-		showWarning(message.getMessage());
 	}
 
 	private void showWarning(String message) {

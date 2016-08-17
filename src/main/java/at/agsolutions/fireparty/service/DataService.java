@@ -11,6 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.time.LocalTime;
@@ -59,7 +63,7 @@ public class DataService implements IDataService {
 			}
 		}
 
-		log.debug("Computed overlaps");
+			log.debug("Computed overlaps");
 		return result;
 	}
 
@@ -115,7 +119,36 @@ public class DataService implements IDataService {
 		}
 	}
 
+	@Override
+	public void generateExcel(final List<Disposition> dispositions, final File file) throws IOException {
+		try (Workbook workBook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(file)) {
+			Sheet sheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Dispositions"));
+
+			// TODO: to be done
+
+			workBook.write(outputStream);
+		}
+	}
+
 	private boolean intersects(LocalTime fromA, LocalTime toA, LocalTime fromB, LocalTime toB) {
-		return (fromA.isBefore(toB) || fromA.equals(toB)) && (toA.isAfter(fromB) || toA.equals(fromB));
+		return isBefore(fromA, toB) && isAfter(toA, fromB);
+	}
+
+	private boolean isBefore(final LocalTime a, final LocalTime b) {
+		if (isMorning(a) && isMorning(b)) {
+			return a.getHour() < b.getHour();
+		}
+		return isMorning(b) || a.getHour() < b.getHour();
+	}
+
+	private boolean isAfter(final LocalTime a, final LocalTime b) {
+		if (isMorning(a) && isMorning(b)) {
+			return a.getHour() > b.getHour();
+		}
+		return isMorning(a) || a.getHour() > b.getHour();
+	}
+
+	private boolean isMorning(final LocalTime time) {
+		return time.getHour() >= 0 && time.getHour() <= 6;
 	}
 }
