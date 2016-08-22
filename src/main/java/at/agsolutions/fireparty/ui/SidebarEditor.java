@@ -8,6 +8,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +53,7 @@ public class SidebarEditor<T> extends VBox {
 
 	private void initToolbar() {
 		Button add = new Button(ADD);
+		add.setGraphic(new FontIcon(FontAwesome.PLUS_SQUARE));
 		add.setOnAction(e -> {
 			TextInputDialog dialog = new TextInputDialog();
 			dialog.setTitle(ADD_DIALOG_TITLE + label);
@@ -61,6 +64,7 @@ public class SidebarEditor<T> extends VBox {
 		});
 
 		remove = new Button(REMOVE);
+		remove.setGraphic(new FontIcon(FontAwesome.TRASH));
 		remove.setDisable(true);
 		remove.setOnAction(e -> data.remove(table.getSelectionModel().getSelectedItem()));
 

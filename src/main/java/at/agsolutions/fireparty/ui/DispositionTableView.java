@@ -10,8 +10,6 @@ import at.agsolutions.fireparty.util.TimeUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -28,7 +26,6 @@ public class DispositionTableView extends TableView<Disposition> {
 	private static final String PERSON_COLUMN_TITLE = "Person";
 	private static final String FROM_COLUMN_TITLE = "From";
 	private static final String TO_COLUMN_TITLE = "To";
-	private static final String LABEL_WARNING = "Warning";
 
 	private static final int TABLE_HEIGHT = 290;
 	private static final int TABLE_WIDTH = 300;
@@ -171,14 +168,7 @@ public class DispositionTableView extends TableView<Disposition> {
 
 	private void showIntegrityWarning() {
 		log.warn("The person is already planned for this time and location.");
-		showWarning("The person is already planned for this time and location.");
-	}
-
-	private void showWarning(String message) {
-		Alert alert = new Alert(AlertType.WARNING);
-		alert.setTitle(LABEL_WARNING);
-		alert.setHeaderText(message);
-		alert.show();
+		MessageProvider.showWarning("The person is already planned for this time and location.");
 	}
 
 	private void dragDropped(DragEvent event) {

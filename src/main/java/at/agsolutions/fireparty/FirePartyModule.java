@@ -6,11 +6,13 @@ import at.agsolutions.fireparty.service.impl.DataService;
 import at.agsolutions.fireparty.service.impl.ExportService;
 import com.google.inject.AbstractModule;
 
+import javax.inject.Singleton;
+
 public class FirePartyModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(IDataService.class).to(DataService.class);
-		bind(IExportService.class).to(ExportService.class);
+		bind(IDataService.class).to(DataService.class).in(Singleton.class);
+		bind(IExportService.class).to(ExportService.class).in(Singleton.class);
 	}
 }

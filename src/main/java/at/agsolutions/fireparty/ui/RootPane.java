@@ -1,9 +1,10 @@
 package at.agsolutions.fireparty.ui;
 
-import at.agsolutions.fireparty.FirePartyApplication;
-import at.agsolutions.fireparty.domain.*;
+import at.agsolutions.fireparty.domain.Disposition;
+import at.agsolutions.fireparty.domain.Location;
+import at.agsolutions.fireparty.domain.PartyHour;
+import at.agsolutions.fireparty.domain.Person;
 import at.agsolutions.fireparty.service.IDataService;
-import at.agsolutions.fireparty.service.IExportService;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -17,13 +18,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -39,14 +38,12 @@ public class RootPane extends BorderPane {
 
 	private final SidebarEditor<Person> personEditor;
 	private IDataService dataService;
-	private IExportService exportService;
 	private Model model = new Model();
 	private FlowPane flowPane;
 
 	@Inject
-	public RootPane(IDataService dataService, IExportService exportService) {
+	public RootPane(IDataService dataService) {
 		this.dataService = dataService;
-		this.exportService = exportService;
 
 		addMenuBar();
 		personEditor = new SidebarEditor<>(model.getPeople(), "person", Person::new, Person::getName);
@@ -96,10 +93,12 @@ public class RootPane extends BorderPane {
 
 		Tab personTab = new Tab(PEOPLE_TAB_TITLE);
 		personTab.setClosable(false);
+		personTab.setGraphic(new FontIcon(FontAwesome.USER));
 		personTab.setContent(personEditor);
 
 		Tab locationTab = new Tab(LOCATIONS_TAB_TITLE);
 		locationTab.setClosable(false);
+		locationTab.setGraphic(new FontIcon(FontAwesome.HOME));
 		locationTab.setContent(new SidebarEditor<>(model.getLocations(), "locations", Location::new, Location::getName));
 
 		tabPane.getTabs().addAll(personTab, locationTab);
@@ -119,81 +118,11 @@ public class RootPane extends BorderPane {
 
 	private void addMenuBar() {
 		MenuBar menuBar = new MenuBar();
-
-		Menu menuFile = new Menu("File");
-		MenuItem exit = new MenuItem("Exit application");
-		exit.setOnAction(e -> System.exit(0));
-
-		MenuItem load = new MenuItem("Load data");
-		load.setOnAction(e -> {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("FireParty files (*.fp)", "*.fp"));
-			fileChooser.setTitle("Load data");
-			try {
-				File file = fileChooser.showOpenDialog(FirePartyApplication.getStage());
-				if (file != null) {
-					dataService.load(file);
-					flowPane.getChildren().clear();
-					populateModel();
-				}
-			} catch (IOException | ClassNotFoundException | ClassCastException ex) {
-				showAndLogError("Failed to load data", ex);
-			}
+		Menu menuFile = new FileMenu(model, () -> {
+			flowPane.getChildren().clear();
+			populateModel();
 		});
-
-		MenuItem save = new MenuItem("Save data");
-		save.setOnAction(e -> {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("FireParty files (*.fp)", "*.fp"));
-			fileChooser.setTitle("Save data");
-			try {
-				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
-				if (file != null) {
-					dataService.save(file, new SerializableFileHolder(
-							new ArrayList<>(model.getPeople()),
-							new ArrayList<>(model.getLocations()),
-							model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList())));
-				}
-			} catch (IOException ex) {
-				showAndLogError("Failed to save data", ex);
-			}
-		});
-
-		MenuItem pdf = new MenuItem("Generate overview PDF");
-		pdf.setOnAction(e -> {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF files (*.pdf)", "*.pdf"));
-			fileChooser.setTitle("Save overview PDF file");
-			try {
-				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
-				if (file != null) {
-					exportService.exportPdf(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
-					), file);
-				}
-			} catch (IOException | IllegalArgumentException ex) {
-				showAndLogError("Failed to generate overview PDF", ex);
-			}
-		});
-
-		MenuItem excel = new MenuItem("Generate overview Excel");
-		excel.setOnAction(e -> {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel files (*.xlsx)", "*.xlsx"));
-			fileChooser.setTitle("Save overview Excel file");
-			try {
-				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
-				if (file != null) {
-					exportService.exportExcel(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
-					), file);
-				}
-			} catch (IOException | IllegalArgumentException ex) {
-				showAndLogError("Failed to generate overview Excel", ex);
-			}
-		});
-
-		menuFile.getItems().addAll(save, load, pdf, excel, exit);
 		menuBar.getMenus().add(menuFile);
-
 		setTop(menuBar);
 	}
 
@@ -224,9 +153,11 @@ public class RootPane extends BorderPane {
 				.withPersonSelectionColumn(model.getPeople());
 
 		Button add = new Button("Add");
+		add.setGraphic(new FontIcon(FontAwesome.CALENDAR_PLUS_O));
 		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(""), loc, new PartyHour(20), new PartyHour(22))));
 
 		Button remove = new Button("Remove");
+		remove.setGraphic(new FontIcon(FontAwesome.TRASH));
 		remove.setDisable(true);
 		remove.setOnAction(e -> table.getItems().remove(table.getSelectionModel().getSelectedItem()));
 		table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -240,14 +171,6 @@ public class RootPane extends BorderPane {
 		box.getChildren().add(table);
 		flowPane.getChildren().add(box);
 		model.getTableData().put(table, dispos);
-	}
-
-	private void showAndLogError(String message, Throwable throwable) {
-		log.error(message, throwable);
-		Alert alert = new Alert(Alert.AlertType.ERROR);
-		alert.setTitle("Error");
-		alert.setHeaderText(message);
-		alert.show();
 	}
 
 	private void validateData() {
