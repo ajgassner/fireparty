@@ -1,11 +1,9 @@
 package at.agsolutions.fireparty.ui;
 
 import at.agsolutions.fireparty.FirePartyApplication;
-import at.agsolutions.fireparty.domain.Disposition;
-import at.agsolutions.fireparty.domain.Location;
-import at.agsolutions.fireparty.domain.Person;
-import at.agsolutions.fireparty.domain.SerializableFileHolder;
+import at.agsolutions.fireparty.domain.*;
 import at.agsolutions.fireparty.service.IDataService;
+import at.agsolutions.fireparty.service.IExportService;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -20,15 +18,16 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class RootPane extends BorderPane {
 
 	private static final int SPACING = 5;
@@ -40,12 +39,14 @@ public class RootPane extends BorderPane {
 
 	private final SidebarEditor<Person> personEditor;
 	private IDataService dataService;
+	private IExportService exportService;
 	private Model model = new Model();
 	private FlowPane flowPane;
 
 	@Inject
-	public RootPane(IDataService dataService) {
+	public RootPane(IDataService dataService, IExportService exportService) {
 		this.dataService = dataService;
+		this.exportService = exportService;
 
 		addMenuBar();
 		personEditor = new SidebarEditor<>(model.getPeople(), "person", Person::new, Person::getName);
@@ -135,8 +136,8 @@ public class RootPane extends BorderPane {
 					flowPane.getChildren().clear();
 					populateModel();
 				}
-			} catch (IOException | ClassNotFoundException e1) {
-				showError("Failed to load data");
+			} catch (IOException | ClassNotFoundException | ClassCastException ex) {
+				showAndLogError("Failed to load data", ex);
 			}
 		});
 
@@ -153,8 +154,8 @@ public class RootPane extends BorderPane {
 							new ArrayList<>(model.getLocations()),
 							model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList())));
 				}
-			} catch (IOException e1) {
-				showError("Failed to save data");
+			} catch (IOException ex) {
+				showAndLogError("Failed to save data", ex);
 			}
 		});
 
@@ -166,11 +167,11 @@ public class RootPane extends BorderPane {
 			try {
 				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 				if (file != null) {
-					dataService.generatePdf(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
+					exportService.exportPdf(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
 					), file);
 				}
-			} catch (IOException ex) {
-				showError("Failed to generate overview PDF");
+			} catch (IOException | IllegalArgumentException ex) {
+				showAndLogError("Failed to generate overview PDF", ex);
 			}
 		});
 
@@ -182,11 +183,11 @@ public class RootPane extends BorderPane {
 			try {
 				File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 				if (file != null) {
-					dataService.generateExcel(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
+					exportService.exportExcel(model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList()
 					), file);
 				}
-			} catch (IOException ex) {
-				showError("Failed to generate overview PDF");
+			} catch (IOException | IllegalArgumentException ex) {
+				showAndLogError("Failed to generate overview Excel", ex);
 			}
 		});
 
@@ -223,8 +224,7 @@ public class RootPane extends BorderPane {
 				.withPersonSelectionColumn(model.getPeople());
 
 		Button add = new Button("Add");
-		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(""), loc, LocalTime.of
-				(8, 0), LocalTime.of(10, 0))));
+		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(""), loc, new PartyHour(20), new PartyHour(22))));
 
 		Button remove = new Button("Remove");
 		remove.setDisable(true);
@@ -242,7 +242,8 @@ public class RootPane extends BorderPane {
 		model.getTableData().put(table, dispos);
 	}
 
-	private void showError(String message) {
+	private void showAndLogError(String message, Throwable throwable) {
+		log.error(message, throwable);
 		Alert alert = new Alert(Alert.AlertType.ERROR);
 		alert.setTitle("Error");
 		alert.setHeaderText(message);

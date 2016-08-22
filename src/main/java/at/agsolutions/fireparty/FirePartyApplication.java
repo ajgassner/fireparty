@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FirePartyApplication extends Application {
 
 	private static Stage stage;
+	private static Injector injector;
 
 	private static final String APP_TITLE = "FireParty Planner";
 	private static final int APP_WIDTH = 800;
@@ -27,7 +28,7 @@ public class FirePartyApplication extends Application {
 		stage = primaryStage;
 		primaryStage.setTitle(APP_TITLE);
 
-		Injector injector = Guice.createInjector(new FirePartyModule());
+		injector = Guice.createInjector(new FirePartyModule());
 
 		primaryStage.setScene(new Scene(injector.getInstance(RootPane.class), APP_WIDTH, APP_HEIGHT));
 		primaryStage.show();
@@ -35,5 +36,9 @@ public class FirePartyApplication extends Application {
 
 	public static Stage getStage() {
 		return stage;
+	}
+
+	public static Injector getInjector() {
+		return injector;
 	}
 }

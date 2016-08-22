@@ -2,7 +2,11 @@ package at.agsolutions.fireparty.ui;
 
 import at.agsolutions.fireparty.domain.Disposition;
 import at.agsolutions.fireparty.domain.Location;
+import at.agsolutions.fireparty.domain.PartyHour;
 import at.agsolutions.fireparty.domain.Person;
+import at.agsolutions.fireparty.ui.converter.PartyHourStringConverter;
+import at.agsolutions.fireparty.ui.converter.PersonConverter;
+import at.agsolutions.fireparty.util.TimeUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,12 +17,8 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.input.*;
-import javafx.util.converter.LocalTimeStringConverter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.LocalTime;
-import java.time.format.FormatStyle;
 
 @Slf4j
 public class DispositionTableView extends TableView<Disposition> {
@@ -29,14 +29,6 @@ public class DispositionTableView extends TableView<Disposition> {
 	private static final String FROM_COLUMN_TITLE = "From";
 	private static final String TO_COLUMN_TITLE = "To";
 	private static final String LABEL_WARNING = "Warning";
-
-	private static final LocalTime[] HOURS = new LocalTime[24];
-
-	static {
-		for (int i = 0; i < HOURS.length; i++) {
-			HOURS[i] = LocalTime.of(i, 0);
-		}
-	}
 
 	private static final int TABLE_HEIGHT = 290;
 	private static final int TABLE_WIDTH = 300;
@@ -114,10 +106,10 @@ public class DispositionTableView extends TableView<Disposition> {
 	}
 
 	public DispositionTableView withFromSelectionColumn() {
-		TableColumn<Disposition, LocalTime> fromCol = new TableColumn<>(FROM_COLUMN_TITLE);
+		TableColumn<Disposition, PartyHour> fromCol = new TableColumn<>(FROM_COLUMN_TITLE);
 		fromCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getFrom()));
-		fromCol.setCellFactory(ComboBoxTableCell.forTableColumn(new LocalTimeStringConverter(FormatStyle.SHORT), FXCollections
-				.observableArrayList(HOURS)));
+		fromCol.setCellFactory(ComboBoxTableCell.forTableColumn(new PartyHourStringConverter(), FXCollections
+				.observableArrayList(TimeUtil.getHours())));
 		fromCol.setOnEditCommit(e -> {
 			boolean commit = true;
 
@@ -145,10 +137,10 @@ public class DispositionTableView extends TableView<Disposition> {
 	}
 
 	public DispositionTableView withToSelectionColumn() {
-		TableColumn<Disposition, LocalTime> toCol = new TableColumn<>(TO_COLUMN_TITLE);
+		TableColumn<Disposition, PartyHour> toCol = new TableColumn<>(TO_COLUMN_TITLE);
 		toCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getTo()));
-		toCol.setCellFactory(ComboBoxTableCell.forTableColumn(new LocalTimeStringConverter(FormatStyle.SHORT), FXCollections
-				.observableArrayList(HOURS)));
+		toCol.setCellFactory(ComboBoxTableCell.forTableColumn(new PartyHourStringConverter(), FXCollections
+				.observableArrayList(TimeUtil.getHours())));
 		toCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setTo(e.getNewValue()));
 
 		toCol.setOnEditCommit(e -> {

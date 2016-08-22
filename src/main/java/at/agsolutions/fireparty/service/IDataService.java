@@ -21,8 +21,4 @@ public interface IDataService {
 	void save(File file, SerializableFileHolder object) throws IOException;
 
 	void load(File file) throws IOException, ClassNotFoundException;
-
-	void generatePdf(List<Disposition> dispositions, File file) throws IOException;
-
-	void generateExcel(List<Disposition> dispositions, File file) throws IOException;
 }

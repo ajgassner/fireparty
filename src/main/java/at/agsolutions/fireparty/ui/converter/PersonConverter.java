@@ -1,4 +1,4 @@
-package at.agsolutions.fireparty.ui;
+package at.agsolutions.fireparty.ui.converter;
 
 import at.agsolutions.fireparty.domain.Person;
 import javafx.util.StringConverter;
