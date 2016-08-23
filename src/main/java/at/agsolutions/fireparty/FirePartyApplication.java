@@ -18,6 +18,7 @@ public class FirePartyApplication extends Application {
 	private static Injector injector;
 
 	private static final String APP_TITLE = "FireParty Planner";
+	private static final String THREAD_NAME = "UI thread";
 	private static final int APP_WIDTH = 800;
 	private static final int APP_HEIGHT = 600;
 	private static final String[] APP_ICONS = new String[]{
@@ -34,7 +35,9 @@ public class FirePartyApplication extends Application {
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
+		Thread.currentThread().setName(THREAD_NAME);
 		log.info("Starting application");
+
 		stage = primaryStage;
 		primaryStage.setTitle(APP_TITLE);
 		Arrays.stream(APP_ICONS).forEach(iconName -> primaryStage.getIcons().add(new Image(FirePartyApplication.class.getResourceAsStream
