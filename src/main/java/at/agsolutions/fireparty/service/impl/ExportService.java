@@ -2,11 +2,11 @@ package at.agsolutions.fireparty.service.impl;
 
 import at.agsolutions.fireparty.domain.Disposition;
 import at.agsolutions.fireparty.domain.PartyHour;
+import at.agsolutions.fireparty.domain.Person;
 import at.agsolutions.fireparty.service.IExportService;
 import be.quodlibet.boxable.BaseTable;
 import be.quodlibet.boxable.datatable.DataTable;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -102,6 +102,13 @@ public class ExportService implements IExportService {
 			font.setFontName("Arial");
 			font.setBold(false);
 
+			Font fontRed = workBook.createFont();
+			fontRed.setFontHeightInPoints((short)10);
+			fontRed.setFontName("Arial");
+			fontRed.setBold(false);
+			fontRed.setItalic(true);
+			fontRed.setColor(IndexedColors.RED.getIndex());
+
 			Font fontBold = workBook.createFont();
 			fontBold.setFontHeightInPoints((short)10);
 			fontBold.setFontName("Arial");
@@ -129,6 +136,14 @@ public class ExportService implements IExportService {
 			cellStyleYellowBold.cloneStyleFrom(cellStyleGrayBold);
 			cellStyleYellowBold.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
 
+			CellStyle cellStyleRed = workBook.createCellStyle();
+			cellStyleRed.cloneStyleFrom(cellStyle);
+			cellStyleRed.setFont(fontRed);
+
+			CellStyle cellStyleGrayRed = workBook.createCellStyle();
+			cellStyleGrayRed.cloneStyleFrom(cellStyleGray);
+			cellStyleGrayRed.setFont(fontRed);
+
 			int rowIndex = 0;
 			int columnIndex = 1;
 			Row headerRow = sheet.createRow(rowIndex);
@@ -146,10 +161,11 @@ public class ExportService implements IExportService {
 				columnIndex++;
 			}
 
-			Collections.sort(dispositions, (d1, d2) -> ObjectUtils.compare(d1.getPerson().getName(), d2.getPerson().getName()));
+			Map<Person, List<Disposition>> persons = dispositions.stream().collect(Collectors.groupingBy(Disposition::getPerson,
+					TreeMap::new, Collectors.toList()));
 
 			rowIndex++;
-			for (Disposition dispo : dispositions) {
+			for (Person person : persons.keySet()) {
 				columnIndex = 0;
 				Row row = sheet.createRow(rowIndex);
 				if (rowIndex % 2 == 0) {
@@ -158,7 +174,7 @@ public class ExportService implements IExportService {
 					row.setRowStyle(cellStyle);
 				}
 				Cell cell = row.createCell(columnIndex);
-				cell.setCellValue(dispo.getPerson().getName());
+				cell.setCellValue(person.getName());
 
 				if (rowIndex % 2 == 0) {
 					cell.setCellStyle(cellStyleGrayBold);
@@ -168,15 +184,32 @@ public class ExportService implements IExportService {
 
 				for (Integer index : times.keySet()) {
 					PartyHour columnTime = times.get(index);
-					if ((columnTime.equals(dispo.getFrom()) || columnTime.isAfter(dispo.getFrom())) && columnTime.isBefore(dispo.getTo())) {
-						cell = row.createCell(index);
-						cell.setCellValue(dispo.getLocation().getName());
+					List<Disposition> dispos = persons.get(person);
 
-						if (rowIndex % 2 == 0) {
-							cell.setCellStyle(cellStyleGray);
-						} else {
-							cell.setCellStyle(cellStyle);
+					String value = "";
+					int count = 0;
+					for (Disposition dispo : dispos) {
+						if ((columnTime.equals(dispo.getFrom()) || columnTime.isAfter(dispo.getFrom())) && columnTime.isBefore(dispo.getTo
+								())) {
+							if (count > 0) {
+								value += " / ";
+							}
+							value += dispo.getLocation().getName();
+							count++;
 						}
+					}
+
+					cell = row.createCell(index);
+					cell.setCellValue(value);
+					boolean even = rowIndex % 2 == 0;
+					if (even && count > 1) {
+						cell.setCellStyle(cellStyleGrayRed);
+					} else if (!even && count > 1) {
+						cell.setCellStyle(cellStyleRed);
+					} else if (even && count <= 1) {
+						cell.setCellStyle(cellStyleGray);
+					} else {
+						cell.setCellStyle(cellStyle);
 					}
 				}
 
