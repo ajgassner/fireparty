@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IExportService {
-	void exportPdf(List<Disposition> dispositions, File file) throws IOException;
+	void exportPdf(List<Disposition> dispositions, File file, String title) throws IOException;
 
-	void exportExcel(List<Disposition> dispositions, File file) throws IOException;
+	void exportExcel(List<Disposition> dispositions, File file, String title) throws IOException;
 }

@@ -32,6 +32,11 @@ public class DataService implements IDataService {
 	}
 
 	@Override
+	public String getSheetName() {
+		return data != null ? data.getSheetName() : "";
+	}
+
+	@Override
 	public Map<Disposition, Disposition> computeOverlaps(final List<Disposition> dispositions) {
 		Map<Disposition, Disposition> result = new HashMap<>();
 

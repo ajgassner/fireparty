@@ -1,10 +1,12 @@
 package at.agsolutions.fireparty.ui;
 
+import at.agsolutions.fireparty.FirePartyApplication;
 import at.agsolutions.fireparty.domain.Disposition;
 import at.agsolutions.fireparty.domain.Location;
 import at.agsolutions.fireparty.domain.PartyHour;
 import at.agsolutions.fireparty.domain.Person;
 import at.agsolutions.fireparty.service.IDataService;
+import at.agsolutions.fireparty.service.IExportService;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -18,32 +20,38 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class RootPane extends BorderPane {
 
 	private static final int SPACING = 5;
-	private static final int LOCATION_FONT_SIZE = 14;
-	private static final String LOCATION_FONT_FACE = "Arial";
+	private static final int FONT_SIZE_HEADER = 14;
+	private static final String FONT_FACE = "Arial";
 
 	private static final String PEOPLE_TAB_TITLE = "People";
 	private static final String LOCATIONS_TAB_TITLE = "Locations";
+	private static final String SETTINGS_TAB_TITLE = "Settings";
 
 	private final SidebarEditor<Person> personEditor;
 	private IDataService dataService;
+	private IExportService exportService;
 	private Model model = new Model();
 	private FlowPane flowPane;
 
 	@Inject
-	public RootPane(IDataService dataService) {
+	public RootPane(IDataService dataService, IExportService exportService) {
 		this.dataService = dataService;
+		this.exportService = exportService;
 
 		addMenuBar();
 		personEditor = new SidebarEditor<>(model.getPeople(), "person", Person::new, Person::getName);
@@ -101,7 +109,12 @@ public class RootPane extends BorderPane {
 		locationTab.setGraphic(new FontIcon(FontAwesome.HOME));
 		locationTab.setContent(new SidebarEditor<>(model.getLocations(), "locations", Location::new, Location::getName));
 
-		tabPane.getTabs().addAll(personTab, locationTab);
+		Tab settingsTab = new Tab(SETTINGS_TAB_TITLE);
+		settingsTab.setClosable(false);
+		settingsTab.setGraphic(new FontIcon(FontAwesome.GEAR));
+		settingsTab.setContent(new SettingsView(model));
+
+		tabPane.getTabs().addAll(personTab, locationTab, settingsTab);
 		return tabPane;
 	}
 
@@ -112,6 +125,8 @@ public class RootPane extends BorderPane {
 
 		model.getPeople().addAll(dataService.getPeople());
 		model.getLocations().addAll(dataService.getLocations());
+
+		model.getSheetName().set(dataService.getSheetName());
 
 		validateData();
 	}
@@ -136,7 +151,7 @@ public class RootPane extends BorderPane {
 	private void addLocationTo(Location loc) {
 		VBox box = new VBox(SPACING);
 		Text location = new Text(loc.getName());
-		location.setFont(Font.font(LOCATION_FONT_FACE, FontWeight.BOLD, LOCATION_FONT_SIZE));
+		location.setFont(Font.font(FONT_FACE, FontWeight.BOLD, FONT_SIZE_HEADER));
 		box.getChildren().add(location);
 
 		ObservableList<Disposition> dispos = FXCollections.observableArrayList();
@@ -164,13 +179,34 @@ public class RootPane extends BorderPane {
 			remove.setDisable(newSelection == null);
 		});
 
+		Button export = new Button("Export");
+		export.setGraphic(new FontIcon(FontAwesome.FILE_EXCEL_O));
+		export.setOnAction(e -> handleSingleExcelExport(loc.getName(), table.getItems()));
+
 		ButtonBar bar = new ButtonBar();
-		bar.getButtons().addAll(add, remove);
+		bar.getButtons().addAll(add, remove, export);
 		box.getChildren().add(bar);
 
 		box.getChildren().add(table);
 		flowPane.getChildren().add(box);
 		model.getTableData().put(table, dispos);
+	}
+
+	private void handleSingleExcelExport(final String name, final List<Disposition> dispositions) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel files (*.xlsx)", "*.xlsx"));
+		fileChooser.setTitle("Save Excel");
+		fileChooser.setInitialFileName(name);
+		try {
+			File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
+			if (file != null) {
+				exportService.exportExcel(dispositions, file, name);
+			}
+		} catch (Exception ex) {
+			String message = "Excel export of " + name + " failed";
+			log.error(message, ex);
+			MessageProvider.showError(message);
+		}
 	}
 
 	private void validateData() {

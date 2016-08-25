@@ -19,6 +19,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +32,7 @@ public class ExportService implements IExportService {
 	private static final String TIME_SEPARATOR = " - ";
 
 	@Override
-	public void exportPdf(final List<Disposition> dispositions, final File file) throws IOException {
+	public void exportPdf(final List<Disposition> dispositions, final File file, String title) throws IOException {
 		List<List> tableData = new ArrayList<>();
 		dispositions.stream().map(Disposition::getLocation).collect(Collectors.toCollection(TreeSet::new)).forEach(l -> {
 			tableData.add(new ArrayList<>(Arrays.asList(l.getName(), SPACES)));
@@ -61,7 +63,7 @@ public class ExportService implements IExportService {
 	}
 
 	@Override
-	public void exportExcel(final List<Disposition> dispositions, final File file) throws IOException {
+	public void exportExcel(final List<Disposition> dispositions, final File file, String title) throws IOException {
 		try (XSSFWorkbook workBook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(file)) {
 			Sheet sheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Dispositions"));
 
@@ -114,6 +116,11 @@ public class ExportService implements IExportService {
 			fontBold.setFontName("Arial");
 			fontBold.setBold(true);
 
+			Font titleFont = workBook.createFont();
+			titleFont.setFontHeightInPoints((short)12);
+			titleFont.setFontName("Arial");
+			titleFont.setBold(true);
+
 			CellStyle cellStyle = workBook.createCellStyle();
 			cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
 			cellStyle.setBorderTop(CellStyle.BORDER_THIN);
@@ -144,7 +151,14 @@ public class ExportService implements IExportService {
 			cellStyleGrayRed.cloneStyleFrom(cellStyleGray);
 			cellStyleGrayRed.setFont(fontRed);
 
-			int rowIndex = 0;
+			CellStyle titleCellStyle = workBook.createCellStyle();
+			titleCellStyle.setFont(titleFont);
+			titleCellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+			CellStyle simpleCellStyle = workBook.createCellStyle();
+			simpleCellStyle.setFont(font);
+
+			int rowIndex = 1;
 			int columnIndex = 1;
 			Row headerRow = sheet.createRow(rowIndex);
 			headerRow.setRowStyle(cellStyleYellowBold);
@@ -232,6 +246,16 @@ public class ExportService implements IExportService {
 				current = nextHour;
 				columnIndex++;
 			}
+
+			Cell metaInfo = sheet.createRow(rowIndex + 2).createCell(0);
+			metaInfo.setCellValue("Created: " + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+			metaInfo.setCellStyle(simpleCellStyle);
+
+			Row titleRow = sheet.createRow(0);
+			titleRow.setHeightInPoints(25);
+			Cell titleCell = titleRow.createCell(0);
+			titleCell.setCellStyle(titleCellStyle);
+			titleCell.setCellValue(title);
 
 			workBook.write(outputStream);
 		}

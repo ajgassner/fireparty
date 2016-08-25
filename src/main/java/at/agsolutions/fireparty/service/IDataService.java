@@ -21,4 +21,6 @@ public interface IDataService {
 	void save(File file, SerializableFileHolder object) throws IOException;
 
 	void load(File file) throws IOException, ClassNotFoundException;
+
+	String getSheetName();
 }

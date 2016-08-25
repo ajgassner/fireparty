@@ -14,4 +14,6 @@ public class SerializableFileHolder implements Serializable {
 	private List<Person> people;
 	private List<Location> locations;
 	private List<Disposition> dispositions;
+
+	private String sheetName;
 }

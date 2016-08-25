@@ -4,6 +4,7 @@ import at.agsolutions.fireparty.domain.Disposition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import lombok.Setter;
@@ -117,6 +118,7 @@ public class SidebarEditor<T> extends VBox {
 		table = new TableView<>();
 		table.setItems(data);
 		table.getColumns().add(nameCol);
+		setVgrow(table, Priority.ALWAYS);
 
 		table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
 			remove.setDisable(newSelection == null);

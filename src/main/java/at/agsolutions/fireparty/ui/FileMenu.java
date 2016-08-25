@@ -64,7 +64,8 @@ public class FileMenu extends Menu {
 							dataService.save(file, new SerializableFileHolder(
 									new ArrayList<>(model.getPeople()),
 									new ArrayList<>(model.getLocations()),
-									extractDispositions()));
+									extractDispositions(),
+									model.getSheetName().getValueSafe()));
 						} catch (Exception e) {
 							showAndLogError("Failed to save data", e);
 						}
@@ -76,7 +77,7 @@ public class FileMenu extends Menu {
 					try {
 						File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 						if (file != null) {
-							exportService.exportPdf(extractDispositions(), file);
+							exportService.exportPdf(extractDispositions(), file, model.getSheetName().getValueSafe());
 						}
 					} catch (Exception ex) {
 						showAndLogError("Failed to generate overview PDF", ex);
@@ -88,7 +89,7 @@ public class FileMenu extends Menu {
 					try {
 						File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 						if (file != null) {
-							exportService.exportExcel(extractDispositions(), file);
+							exportService.exportExcel(extractDispositions(), file, model.getSheetName().getValueSafe());
 						}
 					} catch (Exception ex) {
 						showAndLogError("Failed to generate overview Excel", ex);
@@ -111,6 +112,7 @@ public class FileMenu extends Menu {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionDescription, extensionFilter));
 			fileChooser.setTitle(chooserTitle);
+			fileChooser.setInitialFileName(model.getSheetName().getValueSafe());
 			action.accept(fileChooser);
 		});
 	}
