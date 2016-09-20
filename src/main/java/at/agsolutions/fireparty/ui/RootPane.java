@@ -41,6 +41,7 @@ public class RootPane extends BorderPane {
 	private static final String PEOPLE_TAB_TITLE = "People";
 	private static final String LOCATIONS_TAB_TITLE = "Locations";
 	private static final String SETTINGS_TAB_TITLE = "Settings";
+	private static final String FILTER_TAB_TITLE = "Filter";
 
 	private final SidebarEditor<Person> personEditor;
 	private IDataService dataService;
@@ -114,7 +115,12 @@ public class RootPane extends BorderPane {
 		settingsTab.setGraphic(new FontIcon(FontAwesome.GEAR));
 		settingsTab.setContent(new SettingsView(model));
 
-		tabPane.getTabs().addAll(personTab, locationTab, settingsTab);
+		Tab filterTab = new Tab(FILTER_TAB_TITLE);
+		filterTab.setClosable(false);
+		filterTab.setGraphic(new FontIcon(FontAwesome.FILTER));
+		filterTab.setContent(new FilterView(model));
+
+		tabPane.getTabs().addAll(personTab, locationTab, settingsTab, filterTab);
 		return tabPane;
 	}
 

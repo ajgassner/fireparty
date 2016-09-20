@@ -1,7 +1,6 @@
 package at.agsolutions.fireparty.ui;
 
 import at.agsolutions.fireparty.FirePartyApplication;
-import at.agsolutions.fireparty.domain.Disposition;
 import at.agsolutions.fireparty.domain.SerializableFileHolder;
 import at.agsolutions.fireparty.service.IDataService;
 import at.agsolutions.fireparty.service.IExportService;
@@ -18,10 +17,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class FileMenu extends Menu {
@@ -64,7 +60,7 @@ public class FileMenu extends Menu {
 							dataService.save(file, new SerializableFileHolder(
 									new ArrayList<>(model.getPeople()),
 									new ArrayList<>(model.getLocations()),
-									extractDispositions(),
+									model.extractDispositions(),
 									model.getSheetName().getValueSafe()));
 						} catch (Exception e) {
 							showAndLogError("Failed to save data", e);
@@ -77,7 +73,7 @@ public class FileMenu extends Menu {
 					try {
 						File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 						if (file != null) {
-							exportService.exportPdf(extractDispositions(), file, model.getSheetName().getValueSafe());
+							exportService.exportPdf(model.extractDispositions(), file, model.getSheetName().getValueSafe());
 						}
 					} catch (Exception ex) {
 						showAndLogError("Failed to generate overview PDF", ex);
@@ -89,7 +85,7 @@ public class FileMenu extends Menu {
 					try {
 						File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 						if (file != null) {
-							exportService.exportExcel(extractDispositions(), file, model.getSheetName().getValueSafe());
+							exportService.exportExcel(model.extractDispositions(), file, model.getSheetName().getValueSafe());
 						}
 					} catch (Exception ex) {
 						showAndLogError("Failed to generate overview Excel", ex);
@@ -120,10 +116,6 @@ public class FileMenu extends Menu {
 	private void showAndLogError(String message, Throwable throwable) {
 		log.error(message, throwable);
 		MessageProvider.showError(message);
-	}
-
-	private List<Disposition> extractDispositions() {
-		return model.getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	@Inject

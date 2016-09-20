@@ -8,8 +8,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 public class Model {
@@ -19,4 +22,8 @@ public class Model {
 	private ObservableList<Location> locations = FXCollections.observableArrayList();
 
 	private SimpleStringProperty sheetName = new SimpleStringProperty();
+
+	public List<Disposition> extractDispositions() {
+		return getTableData().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+	}
 }
