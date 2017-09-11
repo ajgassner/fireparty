@@ -23,7 +23,6 @@ Technologies
 
 * Programming language: Java 8
 * UI framework: JavaFX
-* Code generation: Project Lombok
 * Dependency injection: Google Guice
 * Logging: SLF4J with Logback
 * PDF table export: Boxable

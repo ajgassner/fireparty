@@ -1,13 +1,8 @@
 package at.agsolutions.fireparty.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
 public class SerializableFileHolder implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -16,4 +11,28 @@ public class SerializableFileHolder implements Serializable {
 	private List<Disposition> dispositions;
 
 	private String sheetName;
+
+	public SerializableFileHolder(final List<Person> people, final List<Location> locations, final List<Disposition> dispositions, final
+	String sheetName) {
+		this.people = people;
+		this.locations = locations;
+		this.dispositions = dispositions;
+		this.sheetName = sheetName;
+	}
+
+	public List<Person> getPeople() {
+		return people;
+	}
+
+	public List<Location> getLocations() {
+		return locations;
+	}
+
+	public List<Disposition> getDispositions() {
+		return dispositions;
+	}
+
+	public String getSheetName() {
+		return sheetName;
+	}
 }

@@ -7,6 +7,7 @@ import at.agsolutions.fireparty.domain.PartyHour;
 import at.agsolutions.fireparty.domain.Person;
 import at.agsolutions.fireparty.service.IDataService;
 import at.agsolutions.fireparty.service.IExportService;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -21,9 +22,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import lombok.extern.slf4j.Slf4j;
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -31,8 +33,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class RootPane extends BorderPane {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RootPane.class);
 
 	private static final int SPACING = 5;
 	private static final int FONT_SIZE_HEADER = 14;
@@ -55,15 +58,20 @@ public class RootPane extends BorderPane {
 		this.exportService = exportService;
 
 		addMenuBar();
-		personEditor = new SidebarEditor<>(model.getPeople(), "person", Person::new, Person::getName);
+		personEditor = new SidebarEditor<>(
+				model.getPeople(),
+				"person",
+				name -> new Person(new SimpleStringProperty(name)),
+				person -> person.nameProperty().getValue(),
+				(person, name) -> {
+					person.nameProperty().setValue(name);
+					model.getTableData().keySet().forEach(TableView::refresh);
+				});
+
 		populateModel();
 
 		model.getLocations().addListener((ListChangeListener<Location>) e -> {
 			while (e.next()) {
-				if (e.wasAdded()) {
-					e.getAddedSubList().forEach(this::addLocationTo);
-				}
-
 				if (e.wasRemoved()) {
 					Location location = e.getRemoved().stream().findFirst().get();
 					Collection<DispositionTableView> tables = model.getTableData().keySet().stream().filter(t -> t.getLocation().equals
@@ -72,6 +80,10 @@ public class RootPane extends BorderPane {
 						model.getTableData().remove(t);
 						flowPane.getChildren().remove(t.getParent());
 					});
+				}
+
+				if (e.wasAdded()) {
+					e.getAddedSubList().forEach(this::addLocationTo);
 				}
 			}
 		});
@@ -108,7 +120,12 @@ public class RootPane extends BorderPane {
 		Tab locationTab = new Tab(LOCATIONS_TAB_TITLE);
 		locationTab.setClosable(false);
 		locationTab.setGraphic(new FontIcon(FontAwesome.HOME));
-		locationTab.setContent(new SidebarEditor<>(model.getLocations(), "locations", Location::new, Location::getName));
+		locationTab.setContent(new SidebarEditor<>(
+				model.getLocations(),
+				"locations",
+				name -> new Location(new SimpleStringProperty(name)),
+				location -> location.nameProperty().getValue(),
+				(location, name) -> location.nameProperty().setValue(name)));
 
 		Tab settingsTab = new Tab(SETTINGS_TAB_TITLE);
 		settingsTab.setClosable(false);
@@ -132,7 +149,7 @@ public class RootPane extends BorderPane {
 		model.getPeople().addAll(dataService.getPeople());
 		model.getLocations().addAll(dataService.getLocations());
 
-		model.getSheetName().set(dataService.getSheetName());
+		model.sheetNameProperty().setValue(dataService.getSheetName());
 
 		validateData();
 	}
@@ -156,7 +173,8 @@ public class RootPane extends BorderPane {
 
 	private void addLocationTo(Location loc) {
 		VBox box = new VBox(SPACING);
-		Text location = new Text(loc.getName());
+		Text location = new Text();
+		location.textProperty().bindBidirectional(loc.nameProperty());
 		location.setFont(Font.font(FONT_FACE, FontWeight.BOLD, FONT_SIZE_HEADER));
 		box.getChildren().add(location);
 
@@ -175,7 +193,8 @@ public class RootPane extends BorderPane {
 
 		Button add = new Button("Add");
 		add.setGraphic(new FontIcon(FontAwesome.CALENDAR_PLUS_O));
-		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(""), loc, new PartyHour(20), new PartyHour(22))));
+		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(new SimpleStringProperty("")), loc, new PartyHour(20), new
+				PartyHour(22))));
 
 		Button remove = new Button("Remove");
 		remove.setGraphic(new FontIcon(FontAwesome.TRASH));
@@ -187,7 +206,7 @@ public class RootPane extends BorderPane {
 
 		Button export = new Button("Export");
 		export.setGraphic(new FontIcon(FontAwesome.FILE_EXCEL_O));
-		export.setOnAction(e -> handleSingleExcelExport(loc.getName(), table.getItems()));
+		export.setOnAction(e -> handleSingleExcelExport(loc.nameProperty().getValue(), table.getItems()));
 
 		ButtonBar bar = new ButtonBar();
 		bar.getButtons().addAll(add, remove, export);
@@ -210,7 +229,7 @@ public class RootPane extends BorderPane {
 			}
 		} catch (Exception ex) {
 			String message = "Excel export of " + name + " failed";
-			log.error(message, ex);
+			LOGGER.error(message, ex);
 			MessageProvider.showError(message);
 		}
 	}

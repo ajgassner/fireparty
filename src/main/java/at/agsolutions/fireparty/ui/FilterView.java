@@ -91,10 +91,10 @@ public class FilterView extends VBox {
 		table = new TableView<>();
 
 		TableColumn<Disposition, String> nameCol = new TableColumn<>(NAME);
-		nameCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getPerson().getName()));
+		nameCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getPerson().nameProperty().getValue()));
 
 		TableColumn<Disposition, String> locCol = new TableColumn<>(LOC);
-		locCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getLocation().getName()));
+		locCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getLocation().nameProperty().getValue()));
 
 		TableColumn<Disposition, PartyHour> fromCol = new TableColumn<>(FROM);
 		fromCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getFrom()));

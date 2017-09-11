@@ -24,7 +24,7 @@ public class SettingsView extends GridPane {
 		setPadding(new Insets(SPACING));
 
 		TextField sheetName = new TextField();
-		sheetName.textProperty().bindBidirectional(model.getSheetName());
+		sheetName.textProperty().bindBidirectional(model.sheetNameProperty());
 
 		final Label sheetNameLabel = new Label(SHEET_NAME);
 		sheetNameLabel.setLabelFor(sheetName);

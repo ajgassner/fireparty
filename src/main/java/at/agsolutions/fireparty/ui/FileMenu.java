@@ -9,18 +9,20 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
-import lombok.extern.slf4j.Slf4j;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-@Slf4j
 public class FileMenu extends Menu {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
 
 	private final IFileMenuListener listener;
 	private IDataService dataService;
@@ -61,7 +63,7 @@ public class FileMenu extends Menu {
 									new ArrayList<>(model.getPeople()),
 									new ArrayList<>(model.getLocations()),
 									model.extractDispositions(),
-									model.getSheetName().getValueSafe()));
+									model.sheetNameProperty().getValueSafe()));
 						} catch (Exception e) {
 							showAndLogError("Failed to save data", e);
 						}
@@ -73,7 +75,7 @@ public class FileMenu extends Menu {
 					try {
 						File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 						if (file != null) {
-							exportService.exportPdf(model.extractDispositions(), file, model.getSheetName().getValueSafe());
+							exportService.exportPdf(model.extractDispositions(), file, model.sheetNameProperty().getValueSafe());
 						}
 					} catch (Exception ex) {
 						showAndLogError("Failed to generate overview PDF", ex);
@@ -85,7 +87,8 @@ public class FileMenu extends Menu {
 					try {
 						File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 						if (file != null) {
-							exportService.exportExcel(model.extractDispositions(), file, model.getSheetName().getValueSafe());
+							exportService.exportExcel(model.extractDispositions(true /* unallocated people */), file, model
+									.sheetNameProperty().getValueSafe());
 						}
 					} catch (Exception ex) {
 						showAndLogError("Failed to generate overview Excel", ex);
@@ -108,13 +111,13 @@ public class FileMenu extends Menu {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionDescription, extensionFilter));
 			fileChooser.setTitle(chooserTitle);
-			fileChooser.setInitialFileName(model.getSheetName().getValueSafe());
+			fileChooser.setInitialFileName(model.sheetNameProperty().getValueSafe());
 			action.accept(fileChooser);
 		});
 	}
 
 	private void showAndLogError(String message, Throwable throwable) {
-		log.error(message, throwable);
+		LOGGER.error(message, throwable);
 		MessageProvider.showError(message);
 	}
 

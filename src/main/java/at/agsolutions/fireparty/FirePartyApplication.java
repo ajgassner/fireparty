@@ -7,12 +7,14 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-@Slf4j
 public class FirePartyApplication extends Application {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FirePartyApplication.class);
 
 	private static Stage stage;
 	private static Injector injector;
@@ -36,7 +38,7 @@ public class FirePartyApplication extends Application {
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
 		Thread.currentThread().setName(THREAD_NAME);
-		log.info("Starting application");
+		LOGGER.info("Starting application");
 
 		stage = primaryStage;
 		primaryStage.setTitle(APP_TITLE);

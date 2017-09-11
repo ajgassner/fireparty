@@ -6,13 +6,15 @@ import at.agsolutions.fireparty.domain.Person;
 import at.agsolutions.fireparty.domain.SerializableFileHolder;
 import at.agsolutions.fireparty.service.IDataService;
 import at.agsolutions.fireparty.util.TimeUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
 
-@Slf4j
 public class DataService implements IDataService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataService.class);
 
 	private SerializableFileHolder data;
 
@@ -52,7 +54,7 @@ public class DataService implements IDataService {
 			}
 		}
 
-		log.debug("Computed overlaps");
+		LOGGER.debug("Computed overlaps");
 		return result;
 	}
 
@@ -61,7 +63,7 @@ public class DataService implements IDataService {
 		try (ObjectOutput output = new ObjectOutputStream(new FileOutputStream(file))) {
 			output.writeObject(object);
 		} catch (IOException ex) {
-			log.error("Cannot perform save of {} with {}", file, object, ex);
+			LOGGER.error("Cannot perform save of {} with {}", file, object, ex);
 			throw ex;
 		}
 	}
@@ -71,7 +73,7 @@ public class DataService implements IDataService {
 		try (ObjectInput input = new ObjectInputStream(new FileInputStream(file))) {
 			data = (SerializableFileHolder) input.readObject();
 		} catch (ClassNotFoundException | IOException ex) {
-			log.error("Cannot perform load of {}", file, ex);
+			LOGGER.error("Cannot perform load of {}", file, ex);
 			throw ex;
 		}
 	}

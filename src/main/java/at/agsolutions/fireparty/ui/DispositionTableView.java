@@ -15,12 +15,12 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.input.*;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class DispositionTableView extends TableView<Disposition> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DispositionTableView.class);
 	private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
 	private static final String PERSON_COLUMN_TITLE = "Person";
@@ -32,7 +32,6 @@ public class DispositionTableView extends TableView<Disposition> {
 
 	private boolean currentDragAndDrop = false;
 
-	@Getter
 	private Location location;
 
 	public DispositionTableView(ObservableList<Disposition> dispositions, Location location) {
@@ -45,6 +44,10 @@ public class DispositionTableView extends TableView<Disposition> {
 
 		setItems(dispositions);
 		init();
+	}
+
+	public Location getLocation() {
+		return location;
 	}
 
 	private void init() {
@@ -167,7 +170,7 @@ public class DispositionTableView extends TableView<Disposition> {
 	}
 
 	private void showIntegrityWarning() {
-		log.warn("The person is already planned for this time and location.");
+		LOGGER.warn("The person is already planned for this time and location.");
 		MessageProvider.showWarning("The person is already planned for this time and location.");
 	}
 

@@ -1,7 +1,5 @@
 package at.agsolutions.fireparty.domain;
 
-import lombok.Getter;
-
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -24,12 +22,15 @@ public class PartyHour implements Comparable<PartyHour>, Serializable {
 	private static final int MIN_HOUR = 0;
 	private static final int MAX_HOUR = 23;
 
-	@Getter
 	private final int hour;
 
 	public PartyHour(final int hour) {
 		checkRange(hour);
 		this.hour = hour;
+	}
+
+	public int getHour() {
+		return hour;
 	}
 
 	@Override

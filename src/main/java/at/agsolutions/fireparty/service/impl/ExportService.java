@@ -6,7 +6,6 @@ import at.agsolutions.fireparty.domain.Person;
 import at.agsolutions.fireparty.service.IExportService;
 import be.quodlibet.boxable.BaseTable;
 import be.quodlibet.boxable.datatable.DataTable;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -15,6 +14,8 @@ import org.apache.poi.POIXMLProperties;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,8 +25,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
+import static java.util.Comparator.comparing;
+
 public class ExportService implements IExportService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExportService.class);
 
 	private static final String SPACES = StringUtils.repeat(StringUtils.SPACE, 50);
 	private static final int PDF_MARGIN = 30;
@@ -35,11 +39,11 @@ public class ExportService implements IExportService {
 	public void exportPdf(final List<Disposition> dispositions, final File file, String title) throws IOException {
 		List<List> tableData = new ArrayList<>();
 		dispositions.stream().map(Disposition::getLocation).collect(Collectors.toCollection(TreeSet::new)).forEach(l -> {
-			tableData.add(new ArrayList<>(Arrays.asList(l.getName(), SPACES)));
-			dispositions.stream().filter(d -> d.getLocation().equals(l)).sorted((d1, d2) -> d1.getFrom().compareTo(d2.getFrom()))
+			tableData.add(new ArrayList<>(Arrays.asList(l.nameProperty().getValue(), SPACES)));
+			dispositions.stream().filter(d -> d.getLocation().equals(l)).sorted(comparing(Disposition::getFrom))
 					.forEach(d -> tableData.add(new ArrayList<>(Arrays.asList(d.getFrom().format(PartyHour.FORMATTER) + TIME_SEPARATOR + d
 							.getTo()
-							.format(PartyHour.FORMATTER), d.getPerson().getName()))));
+							.format(PartyHour.FORMATTER), d.getPerson().nameProperty().getValue()))));
 		});
 
 		try (PDDocument doc = new PDDocument()) {
@@ -55,9 +59,9 @@ public class ExportService implements IExportService {
 			dataTable.draw();
 
 			doc.save(file);
-			log.info("Generated PDF successfully");
+			LOGGER.info("Generated PDF successfully");
 		} catch (IOException e) {
-			log.error("Failed to generate PDF {} with data {}", dispositions, file, e);
+			LOGGER.error("Failed to generate PDF {} with data {}", dispositions, file, e);
 			throw e;
 		}
 	}
@@ -92,7 +96,7 @@ public class ExportService implements IExportService {
 				last = hours.last();
 				current = hours.first();
 			} catch (NoSuchElementException e) {
-				log.warn("Aborting generation of Excel. No data available");
+				LOGGER.warn("Aborting generation of Excel. No data available");
 				Cell cell = sheet.createRow(0).createCell(0);
 				cell.setCellValue("No data available");
 				workBook.write(outputStream);
@@ -188,7 +192,7 @@ public class ExportService implements IExportService {
 					row.setRowStyle(cellStyle);
 				}
 				Cell cell = row.createCell(columnIndex);
-				cell.setCellValue(person.getName());
+				cell.setCellValue(person.nameProperty().getValue());
 
 				if (rowIndex % 2 == 0) {
 					cell.setCellStyle(cellStyleGrayBold);
@@ -200,21 +204,21 @@ public class ExportService implements IExportService {
 					PartyHour columnTime = times.get(index);
 					List<Disposition> dispos = persons.get(person);
 
-					String value = "";
+					StringBuilder value = new StringBuilder();
 					int count = 0;
 					for (Disposition dispo : dispos) {
 						if ((columnTime.equals(dispo.getFrom()) || columnTime.isAfter(dispo.getFrom())) && columnTime.isBefore(dispo.getTo
 								())) {
 							if (count > 0) {
-								value += " / ";
+								value.append(" / ");
 							}
-							value += dispo.getLocation().getName();
+							value.append(dispo.getLocation().nameProperty().getValue());
 							count++;
 						}
 					}
 
 					cell = row.createCell(index);
-					cell.setCellValue(value);
+					cell.setCellValue(value.toString());
 					boolean even = rowIndex % 2 == 0;
 					if (even && count > 1) {
 						cell.setCellStyle(cellStyleGrayRed);
