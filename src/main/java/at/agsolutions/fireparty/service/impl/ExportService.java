@@ -85,8 +85,10 @@ public class ExportService implements IExportService {
 
 			SortedSet<PartyHour> hours = new TreeSet<>();
 			dispositions.forEach(d -> {
-				hours.add(d.getFrom());
-				hours.add(d.getTo());
+				if (!d.getFrom().equals(d.getTo())) {
+					hours.add(d.getFrom());
+					hours.add(d.getTo());
+				}
 			});
 
 			PartyHour last;
