@@ -1,7 +1,7 @@
 FireParty [![MIT License][license-image]][license-url]
 =========
 
-![FireParty](/doc/screen.png?raw=true "FireParty")
+![FireParty](doc/screen.png?raw=true "FireParty")
 
 Features
 --------
