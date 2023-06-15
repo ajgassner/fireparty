@@ -40,7 +40,7 @@ public class Model {
 					dispositions.add(
 							new Disposition(
 									person,
-									new Location(new SimpleStringProperty("-")),
+									new Location("-"),
 									new PartyHour(0),
 									new PartyHour(0)));
 				}

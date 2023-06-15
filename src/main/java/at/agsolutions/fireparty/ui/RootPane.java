@@ -61,7 +61,7 @@ public class RootPane extends BorderPane {
 		personEditor = new SidebarEditor<>(
 				model.getPeople(),
 				"person",
-				name -> new Person(new SimpleStringProperty(name)),
+				name -> new Person(name),
 				person -> person.nameProperty().getValue(),
 				(person, name) -> {
 					person.nameProperty().setValue(name);
@@ -123,7 +123,7 @@ public class RootPane extends BorderPane {
 		locationTab.setContent(new SidebarEditor<>(
 				model.getLocations(),
 				"locations",
-				name -> new Location(new SimpleStringProperty(name)),
+				name -> new Location(name),
 				location -> location.nameProperty().getValue(),
 				(location, name) -> location.nameProperty().setValue(name)));
 
@@ -193,7 +193,7 @@ public class RootPane extends BorderPane {
 
 		Button add = new Button("Add");
 		add.setGraphic(new FontIcon(FontAwesome.CALENDAR_PLUS_O));
-		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(new SimpleStringProperty("")), loc, new PartyHour(20), new
+		add.setOnAction(e -> table.getItems().add(new Disposition(new Person(""), loc, new PartyHour(20), new
 				PartyHour(22))));
 
 		Button remove = new Button("Remove");

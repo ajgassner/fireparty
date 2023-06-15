@@ -1,7 +1,7 @@
 package at.agsolutions.fireparty.ui;
 
 import at.agsolutions.fireparty.FirePartyApplication;
-import at.agsolutions.fireparty.domain.SerializableFileHolder;
+import at.agsolutions.fireparty.domain.DataFileHolder;
 import at.agsolutions.fireparty.service.IDataService;
 import at.agsolutions.fireparty.service.IExportService;
 import at.agsolutions.fireparty.util.InjectorUtil;
@@ -59,7 +59,7 @@ public class FileMenu extends Menu {
 					File file = fileChooser.showSaveDialog(FirePartyApplication.getStage());
 					if (file != null) {
 						try {
-							dataService.save(file, new SerializableFileHolder(
+							dataService.save(file, new DataFileHolder(
 									new ArrayList<>(model.getPeople()),
 									new ArrayList<>(model.getLocations()),
 									model.extractDispositions(),

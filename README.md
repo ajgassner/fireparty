@@ -27,7 +27,8 @@ Technologies
 * Logging: SLF4J with Logback
 * PDF table export: Boxable
 * Helper utility: Apache Commons
-* Excel export: ApAche POI
+* Excel export: Apache POI
+* Object serialization: Jackson
 * Font icons: Ikonli
 * Unit tests: JUnit
 

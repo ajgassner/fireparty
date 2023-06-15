@@ -3,20 +3,24 @@ package at.agsolutions.fireparty.domain;
 import javafx.beans.property.SimpleStringProperty;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.io.Serializable;
+import java.beans.ConstructorProperties;
 import java.util.Objects;
 
-public class Person implements Serializable, Comparable<Person> {
-	private static final long serialVersionUID = 1L;
+public class Person implements Comparable<Person> {
 
 	private SimpleStringProperty name;
 
-	public Person(final SimpleStringProperty name) {
-		this.name = name;
+	@ConstructorProperties({"name"})
+	public Person(final String name) {
+		this.name = new SimpleStringProperty(name);
 	}
 
 	public SimpleStringProperty nameProperty() {
 		return name;
+	}
+
+	public String getName() {
+		return name.get();
 	}
 
 	@Override

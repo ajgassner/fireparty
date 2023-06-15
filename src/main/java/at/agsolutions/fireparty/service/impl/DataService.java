@@ -1,22 +1,26 @@
 package at.agsolutions.fireparty.service.impl;
 
+import at.agsolutions.fireparty.domain.DataFileHolder;
 import at.agsolutions.fireparty.domain.Disposition;
 import at.agsolutions.fireparty.domain.Location;
 import at.agsolutions.fireparty.domain.Person;
-import at.agsolutions.fireparty.domain.SerializableFileHolder;
 import at.agsolutions.fireparty.service.IDataService;
 import at.agsolutions.fireparty.util.TimeUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DataService implements IDataService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataService.class);
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	private SerializableFileHolder data;
+	private DataFileHolder data;
 
 	@Override
 	public List<Disposition> getDispositions() {
@@ -59,9 +63,9 @@ public class DataService implements IDataService {
 	}
 
 	@Override
-	public void save(File file, SerializableFileHolder object) throws IOException {
-		try (ObjectOutput output = new ObjectOutputStream(new FileOutputStream(file))) {
-			output.writeObject(object);
+	public void save(File file, DataFileHolder object) throws IOException {
+		try {
+			objectMapper.writeValue(file, object);
 		} catch (IOException ex) {
 			LOGGER.error("Cannot perform save of {} with {}", file, object, ex);
 			throw ex;
@@ -69,10 +73,20 @@ public class DataService implements IDataService {
 	}
 
 	@Override
-	public void load(File file) throws IOException, ClassNotFoundException {
-		try (ObjectInput input = new ObjectInputStream(new FileInputStream(file))) {
-			data = (SerializableFileHolder) input.readObject();
-		} catch (ClassNotFoundException | IOException ex) {
+	public void load(File file) throws IOException {
+		try {
+			DataFileHolder tempData = objectMapper.readValue(file, DataFileHolder.class);
+			// map people and locations to same objects
+			data = new DataFileHolder(
+					tempData.getPeople(),
+					tempData.getLocations(),
+					tempData.getDispositions().stream().map(dispo -> new Disposition(
+							tempData.getPeople().stream().filter(person -> person.getName().equals(dispo.getPerson().getName())).findFirst().get(),
+							tempData.getLocations().stream().filter(loc -> loc.getName().equals(dispo.getLocation().getName())).findFirst().get(),
+							dispo.getFrom(),
+							dispo.getTo()
+					)).collect(Collectors.toList()), tempData.getSheetName());
+		} catch (IOException ex) {
 			LOGGER.error("Cannot perform load of {}", file, ex);
 			throw ex;
 		}

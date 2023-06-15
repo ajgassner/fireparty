@@ -13,6 +13,6 @@ public class PersonConverter extends StringConverter<Person> {
 
 	@Override
 	public Person fromString(final String name) {
-		return new Person(new SimpleStringProperty(name));
+		return new Person(name);
 	}
 }

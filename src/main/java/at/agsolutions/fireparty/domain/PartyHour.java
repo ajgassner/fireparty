@@ -1,6 +1,8 @@
 package at.agsolutions.fireparty.domain;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.beans.ConstructorProperties;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -10,9 +12,7 @@ import java.util.Objects;
 /**
  * It's not the happy hour ;)
  */
-public class PartyHour implements Comparable<PartyHour>, Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class PartyHour implements Comparable<PartyHour> {
 
 	public static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
 			.appendValue(ChronoField.HOUR_OF_DAY, 2)
@@ -24,6 +24,7 @@ public class PartyHour implements Comparable<PartyHour>, Serializable {
 
 	private final int hour;
 
+	@ConstructorProperties({"hour"})
 	public PartyHour(final int hour) {
 		checkRange(hour);
 		this.hour = hour;
@@ -80,6 +81,7 @@ public class PartyHour implements Comparable<PartyHour>, Serializable {
 		return getHour() > other.getHour();
 	}
 
+	@JsonIgnore
 	public boolean isMorning() {
 		return getHour() >= 0 && getHour() <= 6;
 	}

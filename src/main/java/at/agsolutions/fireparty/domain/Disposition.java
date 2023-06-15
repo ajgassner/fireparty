@@ -1,15 +1,15 @@
 package at.agsolutions.fireparty.domain;
 
-import java.io.Serializable;
+import java.beans.ConstructorProperties;
 
-public class Disposition implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class Disposition {
 
 	private Person person;
 	private Location location;
 	private PartyHour from;
 	private PartyHour to;
 
+	@ConstructorProperties({"person", "location", "from", "to"})
 	public Disposition(final Person person, final Location location, final PartyHour from, final PartyHour to) {
 		this.person = person;
 		this.location = location;
