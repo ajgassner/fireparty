@@ -1,0 +1,54 @@
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "tailwindcss";
+
+@theme {
+	--font-sans: "IBM Plex Sans", system-ui, sans-serif;
+	--font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+	--color-ink: oklch(0.24 0.01 60);
+	--color-muted: oklch(0.52 0.01 60);
+	--color-faint: oklch(0.68 0.01 60);
+	--color-line: oklch(0.9 0.006 60);
+	--color-line-strong: oklch(0.8 0.01 60);
+	--color-canvas: oklch(0.982 0.003 60);
+	--color-soft: oklch(0.955 0.006 60);
+	--color-soft-line: oklch(0.87 0.008 60);
+	--color-alarm: oklch(0.55 0.19 27);
+	--color-alarm-soft: oklch(0.965 0.025 27);
+	--color-alarm-line: oklch(0.87 0.06 27);
+}
+
+html,
+body,
+#root {
+	height: 100%;
+}
+
+body {
+	@apply bg-canvas font-sans text-ink antialiased;
+}
+
+@layer components {
+	.btn {
+		@apply inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-line bg-white px-2.5 text-[13px] font-medium whitespace-nowrap text-ink hover:bg-soft disabled:pointer-events-none disabled:opacity-40;
+	}
+	.btn-primary {
+		@apply border-ink bg-ink text-white hover:bg-ink/85;
+	}
+	.btn-danger {
+		@apply border-alarm-line text-alarm hover:bg-alarm-soft;
+	}
+	.btn-icon {
+		@apply inline-flex size-7 items-center justify-center rounded text-faint hover:bg-soft hover:text-ink disabled:pointer-events-none disabled:opacity-35;
+	}
+	.field {
+		@apply h-[34px] w-full min-w-0 rounded-md border border-line bg-white px-2.5 text-[13px] text-ink placeholder:text-faint focus:border-ink/40 focus:outline-2 focus:outline-offset-0 focus:outline-soft;
+	}
+	.label {
+		@apply text-xs font-medium text-muted;
+	}
+}
