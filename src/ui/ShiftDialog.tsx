@@ -27,7 +27,7 @@ export function ShiftDialog() {
 			ref={ref}
 			onClose={close}
 			onClick={(e) => e.target === e.currentTarget && close()}
-			className="m-auto w-[440px] max-w-[calc(100vw-32px)] rounded-[10px] bg-white p-0 text-ink shadow-[0_24px_60px_oklch(0.2_0.01_60/0.25),0_2px_6px_oklch(0.2_0.01_60/0.12)] backdrop:bg-ink/40"
+			className="m-auto w-[440px] max-w-[calc(100vw-32px)] rounded-[10px] bg-surface p-0 text-ink shadow-dialog backdrop:bg-backdrop"
 		>
 			{draft && <DialogBody key={JSON.stringify(draft)} draft={draft} onClose={close} />}
 		</dialog>

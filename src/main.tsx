@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "./ui/theme";
 import { App } from "./ui/App";
 
 // biome-ignore lint/style/noNonNullAssertion: element exists in index.html

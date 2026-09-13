@@ -8,6 +8,7 @@ import { useDerived } from "./derived";
 import { createExamplePlan } from "./example";
 import { HourSelect } from "./HourSelect";
 import { report } from "./notify";
+import { ThemeSwitch } from "./ThemeSwitch";
 import type { DragData } from "./Timeline";
 import { type SideTab, useUi } from "./uiStore";
 
@@ -22,7 +23,7 @@ export function Sidebar() {
 	const setTab = useUi((s) => s.setSideTab);
 
 	return (
-		<aside className="flex min-h-0 flex-col border-line bg-white max-lg:border-t lg:w-80 lg:shrink-0 lg:border-l">
+		<aside className="flex min-h-0 flex-col border-line bg-surface max-lg:border-t lg:w-80 lg:shrink-0 lg:border-l">
 			<div role="tablist" className="flex h-12 shrink-0 items-end gap-5 border-b border-line px-5 text-[13px]">
 				{TABS.map((t) => (
 					<button
@@ -291,6 +292,10 @@ function SettingsTab() {
 					Schichten außerhalb vergrößern das Fenster automatisch. Nach Mitternacht erscheint z. B.{" "}
 					<span className="font-mono">{formatHourLabel(26)}</span>.
 				</span>
+			</div>
+			<div className="flex flex-col gap-1.5">
+				<span className="label">Darstellung</span>
+				<ThemeSwitch />
 			</div>
 			<div className="h-px bg-line" />
 			<div className="flex flex-col gap-2.5">

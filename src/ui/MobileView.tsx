@@ -8,6 +8,7 @@ import { useDerived } from "./derived";
 import { createExamplePlan } from "./example";
 import { exportPlanExcel, exportPlanPdf, savePlan } from "./fileActions";
 import { Logo, useOpenFile } from "./Header";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 type Group = "locations" | "people";
 
@@ -36,7 +37,7 @@ export function MobileView() {
 
 	return (
 		<div className="flex min-h-full flex-col bg-canvas">
-			<header className="sticky top-0 z-10 flex h-[60px] items-center gap-2.5 border-b border-line bg-white pr-2 pl-4">
+			<header className="sticky top-0 z-10 flex h-[60px] items-center gap-2.5 border-b border-line bg-surface pr-2 pl-4">
 				<Logo />
 				<div className="flex min-w-0 flex-1 flex-col leading-tight">
 					<span className="truncate text-base font-semibold">{plan.name || "FireParty"}</span>
@@ -55,7 +56,7 @@ export function MobileView() {
 						<Menu className="size-[22px]" />
 					</button>
 					{menuOpen && (
-						<div className="absolute top-12 right-0 flex w-52 flex-col rounded-lg border border-line bg-white p-1 shadow-lg">
+						<div className="absolute top-12 right-0 flex w-64 flex-col rounded-lg border border-line bg-surface p-1 shadow-lg">
 							{[
 								{ icon: Save, label: "Als Datei speichern", run: savePlan },
 								{ icon: Sheet, label: "Excel exportieren", run: exportPlanExcel },
@@ -78,13 +79,17 @@ export function MobileView() {
 									{item.label}
 								</button>
 							))}
+							<div className="mt-1 flex flex-col gap-1.5 border-t border-line px-2 pt-2.5 pb-1.5">
+								<span className="label">Darstellung</span>
+								<ThemeSwitch large />
+							</div>
 						</div>
 					)}
 				</div>
 			</header>
 
 			<div className="flex flex-col gap-3 px-4 pt-3.5">
-				<div role="tablist" className="grid grid-cols-2 rounded-lg bg-[oklch(0.935_0.006_60)] p-[3px]">
+				<div role="tablist" className="grid grid-cols-2 rounded-lg bg-track p-[3px]">
 					{(["locations", "people"] as const).map((g) => (
 						<button
 							key={g}
@@ -92,7 +97,7 @@ export function MobileView() {
 							role="tab"
 							aria-selected={group === g}
 							onClick={() => setGroup(g)}
-							className={`h-[38px] rounded-md text-sm ${group === g ? "bg-white font-semibold shadow-xs" : "text-muted"}`}
+							className={`h-[38px] rounded-md text-sm ${group === g ? "bg-surface font-semibold shadow-xs" : "text-muted"}`}
 						>
 							{g === "locations" ? "Standorte" : "Personen"}
 						</button>
@@ -115,7 +120,7 @@ export function MobileView() {
 					</p>
 				)}
 				{sections.map((section) => (
-					<section key={section.id} className="overflow-hidden rounded-[10px] border border-line bg-white">
+					<section key={section.id} className="overflow-hidden rounded-[10px] border border-line bg-surface">
 						<div className="flex items-baseline gap-2 px-4 py-3">
 							<h2 className="text-base font-semibold">{section.title}</h2>
 							<span className="text-[13px] text-muted">
@@ -141,7 +146,7 @@ export function MobileView() {
 				))}
 			</div>
 
-			<div className="sticky bottom-0 mt-auto grid grid-cols-2 gap-2.5 border-t border-line bg-white px-4 pt-3 pb-5">
+			<div className="sticky bottom-0 mt-auto grid grid-cols-2 gap-2.5 border-t border-line bg-surface px-4 pt-3 pb-5">
 				<button type="button" className="btn h-[46px] justify-center rounded-lg text-[15px]" onClick={file.open}>
 					<FolderOpen className="size-[18px]" />
 					Öffnen

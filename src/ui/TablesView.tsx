@@ -16,7 +16,7 @@ export function TablesView() {
 
 	if (plan.locations.length === 0) {
 		return (
-			<div className="flex flex-col items-center gap-3 rounded-lg border border-line bg-white px-6 py-16 text-center">
+			<div className="flex flex-col items-center gap-3 rounded-lg border border-line bg-surface px-6 py-16 text-center">
 				<p className="text-sm font-medium">Noch keine Standorte</p>
 				<button type="button" className="btn" onClick={() => setSideTab("locations")}>
 					Standorte anlegen
@@ -42,7 +42,7 @@ function LocationCard({ location }: { location: Location }) {
 	const defaultFrom = 20 >= window.startHour && 20 < window.endHour ? 20 : window.startHour;
 
 	return (
-		<section className="flex flex-col overflow-hidden rounded-lg border border-line bg-white">
+		<section className="flex flex-col overflow-hidden rounded-lg border border-line bg-surface">
 			<header className="flex h-[52px] items-center gap-2 border-b border-line pr-3 pl-4">
 				<h3 className="truncate text-sm font-semibold">{location.name}</h3>
 				<span className="text-xs whitespace-nowrap text-muted">

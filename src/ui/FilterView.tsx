@@ -48,7 +48,7 @@ export function FilterView() {
 					{hits.length === 1 ? "1 Einteilung" : `${hits.length} Einteilungen`} im Zeitraum
 				</span>
 			</div>
-			<div className="overflow-hidden rounded-lg border border-line bg-white">
+			<div className="overflow-hidden rounded-lg border border-line bg-surface">
 				<div className={`grid ${COLUMNS} h-[38px] items-center gap-4 px-4 text-xs text-muted`}>
 					<span>Name</span>
 					<span>Standort</span>

@@ -136,7 +136,7 @@ function Planner() {
 										role="tab"
 										aria-selected={view === v.id}
 										onClick={() => setView(v.id)}
-										className={`rounded-md border px-3 py-1.5 text-[13px] ${view === v.id ? "border-line bg-white font-semibold" : "border-transparent text-muted hover:text-ink"}`}
+										className={`rounded-md border px-3 py-1.5 text-[13px] ${view === v.id ? "border-line bg-surface font-semibold" : "border-transparent text-muted hover:text-ink"}`}
 									>
 										{v.label}
 									</button>
@@ -159,7 +159,7 @@ function Planner() {
 			</div>
 			<DragOverlay dropAnimation={null}>
 				{dragLabel && (
-					<div className="mt-5 ml-5 inline-flex h-9 cursor-grabbing items-center rounded-md border border-line-strong bg-white px-3 text-[13px] font-medium shadow-lg">
+					<div className="mt-5 ml-5 inline-flex h-9 cursor-grabbing items-center rounded-md border border-line-strong bg-surface px-3 text-[13px] font-medium shadow-lg">
 						{dragLabel}
 					</div>
 				)}
@@ -206,7 +206,7 @@ function Notices() {
 				<div
 					key={n.id}
 					className={`pointer-events-auto flex max-w-md items-center gap-2 rounded-lg border py-2 pr-2 pl-3.5 text-[13px] shadow-lg ${
-						n.kind === "error" ? "border-alarm-line bg-alarm-soft text-alarm" : "border-line bg-white"
+						n.kind === "error" ? "border-alarm-line bg-alarm-soft text-alarm" : "border-line bg-surface"
 					}`}
 				>
 					{n.kind === "error" && <TriangleAlert className="size-4 shrink-0" />}

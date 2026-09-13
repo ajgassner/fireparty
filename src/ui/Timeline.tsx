@@ -43,7 +43,7 @@ export function Timeline() {
 
 	if (plan.locations.length === 0) {
 		return (
-			<div className="flex flex-col items-center gap-3 rounded-lg border border-line bg-white px-6 py-16 text-center">
+			<div className="flex flex-col items-center gap-3 rounded-lg border border-line bg-surface px-6 py-16 text-center">
 				<p className="text-sm font-medium">Noch keine Standorte</p>
 				<p className="max-w-sm text-[13px] text-pretty text-muted">
 					Lege zuerst Standorte wie Schank, Grill oder Kassa an. Danach ziehst du Personen in die Zeitleiste.
@@ -56,11 +56,11 @@ export function Timeline() {
 	}
 
 	return (
-		<div className="overflow-auto rounded-lg border border-line bg-white">
+		<div className="overflow-auto rounded-lg border border-line bg-surface">
 			<div style={{ width: LABEL_WIDTH + width }}>
-				<div className="sticky top-0 z-20 flex h-9 border-b border-line bg-white">
+				<div className="sticky top-0 z-20 flex h-9 border-b border-line bg-surface">
 					<div
-						className="sticky left-0 z-10 flex shrink-0 items-center border-r border-line bg-white px-4 text-xs text-muted"
+						className="sticky left-0 z-10 flex shrink-0 items-center border-r border-line bg-surface px-4 text-xs text-muted"
 						style={{ width: LABEL_WIDTH }}
 					>
 						Standort
@@ -95,7 +95,7 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 	return (
 		<div className="flex border-b border-line last:border-b-0">
 			<div
-				className="sticky left-0 z-10 flex shrink-0 flex-col justify-center gap-0.5 border-r border-line bg-white px-4"
+				className="sticky left-0 z-10 flex shrink-0 flex-col justify-center gap-0.5 border-r border-line bg-surface px-4"
 				style={{ width: LABEL_WIDTH }}
 			>
 				<span className="truncate text-sm font-semibold">{location.name}</span>
@@ -204,7 +204,7 @@ function ShiftBlock({ shift, startHour, lane }: { shift: Shift; startHour: Hour;
 				if (Date.now() - lastDrag.endedAt > 150) openDialog({ mode: "edit", shiftId: shift.id });
 			}}
 			className={`group absolute z-[1] flex cursor-grab touch-none flex-col justify-center gap-px overflow-hidden rounded-md border px-2.5 text-left transition-opacity select-none focus-visible:outline-2 focus-visible:outline-ink ${
-				conflictWith ? "border-alarm bg-[oklch(0.96_0.03_27)]" : "border-soft-line bg-soft hover:border-line-strong"
+				conflictWith ? "border-alarm bg-alarm-block" : "border-soft-line bg-soft hover:border-line-strong"
 			} ${isDragging ? "opacity-40" : dimmed ? "opacity-30" : ""} ${resize ? "z-10 shadow-md" : ""}`}
 			style={geometry(from, to, startHour, lane)}
 		>

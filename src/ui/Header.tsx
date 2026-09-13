@@ -4,7 +4,7 @@ import { usePlanStore } from "../store";
 import { exportPlanExcel, exportPlanPdf, openPlan, savePlan } from "./fileActions";
 
 export function Logo() {
-	return <div aria-hidden className="size-[22px] shrink-0 rounded-[5px] bg-alarm" />;
+	return <div aria-hidden className="size-[22px] shrink-0 rounded-[5px] bg-brand" />;
 }
 
 /** Hidden file input plus a function to open the picker. */
@@ -33,7 +33,7 @@ export function Header() {
 	const file = useOpenFile();
 
 	return (
-		<header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-white px-6">
+		<header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-surface px-6">
 			<div className="flex items-center gap-2">
 				<Logo />
 				<span className="text-[15px] font-semibold">FireParty</span>
