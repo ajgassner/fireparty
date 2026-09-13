@@ -60,7 +60,7 @@ export function Timeline() {
 			<div style={{ width: LABEL_WIDTH + width }}>
 				<div className="sticky top-0 z-20 flex h-9 border-b border-line bg-white">
 					<div
-						className="sticky left-0 z-10 flex shrink-0 items-center bg-white px-4 text-xs text-muted"
+						className="sticky left-0 z-10 flex shrink-0 items-center border-r border-line bg-white px-4 text-xs text-muted"
 						style={{ width: LABEL_WIDTH }}
 					>
 						Standort
@@ -68,7 +68,7 @@ export function Timeline() {
 					{hours.map((h) => (
 						<div
 							key={h}
-							className={`flex shrink-0 items-center border-l border-line pl-2 font-mono text-xs ${h % 24 === 0 ? "font-semibold text-ink" : "text-muted"}`}
+							className={`flex shrink-0 items-center border-r pl-2 font-mono text-xs ${(h + 1) % 24 === 0 ? "border-line-strong" : "border-line"} ${h % 24 === 0 ? "font-semibold text-ink" : "text-muted"}`}
 							style={{ width: HOUR_WIDTH }}
 						>
 							{formatHour(h)}
@@ -110,7 +110,7 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 				}}
 			>
 				{midnightOffsets.map((left) => (
-					<div key={left} className="absolute inset-y-0 w-0.5 -translate-x-px bg-line-strong" style={{ left }} />
+					<div key={left} className="absolute inset-y-0 w-px bg-line-strong" style={{ left: left - 1 }} />
 				))}
 				{hours.map((h) => (
 					<DropCell key={h} locationId={location.id} hour={h} left={(h - startHour) * HOUR_WIDTH} />
