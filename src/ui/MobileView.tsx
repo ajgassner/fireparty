@@ -127,21 +127,23 @@ export function MobileView() {
 								{section.shifts.length === 1 ? "1 Schicht" : `${section.shifts.length} Schichten`}
 							</span>
 						</div>
-						{[...section.shifts].sort(compareShifts).map((s) => {
-							const conflict = conflicts.has(s.id);
-							return (
-								<div
-									key={s.id}
-									className={`flex min-h-[52px] items-center gap-3.5 border-t border-line px-4 ${conflict ? "bg-alarm-soft text-alarm" : ""}`}
-								>
-									<span className={`w-16 font-mono text-sm ${conflict ? "" : "text-muted"}`}>
-										{formatShortRange(s.from, s.to)}
-									</span>
-									<span className="flex-1 text-[15px] font-medium">{label(s)}</span>
-									{conflict && <TriangleAlert className="size-4" />}
-								</div>
-							);
-						})}
+						{[...section.shifts]
+							.sort((a, b) => compareShifts(a, b) || label(a).localeCompare(label(b), "de"))
+							.map((s) => {
+								const conflict = conflicts.has(s.id);
+								return (
+									<div
+										key={s.id}
+										className={`flex min-h-[52px] items-center gap-3.5 border-t border-line px-4 ${conflict ? "bg-alarm-soft text-alarm" : ""}`}
+									>
+										<span className={`w-16 font-mono text-sm ${conflict ? "" : "text-muted"}`}>
+											{formatShortRange(s.from, s.to)}
+										</span>
+										<span className="flex-1 text-[15px] font-medium">{label(s)}</span>
+										{conflict && <TriangleAlert className="size-4" />}
+									</div>
+								);
+							})}
 					</section>
 				))}
 			</div>

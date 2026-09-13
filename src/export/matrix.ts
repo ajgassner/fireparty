@@ -1,4 +1,4 @@
-import { compareShifts, lookup, sortByName } from "../domain/plan";
+import { compareShifts, lookup, shiftsOfLocation, sortByName } from "../domain/plan";
 import { range } from "../domain/time";
 import type { Hour, Location, Person, Plan, Shift } from "../domain/types";
 
@@ -41,16 +41,17 @@ export interface LocationList {
 	entries: { from: Hour; to: Hour; person: string }[];
 }
 
-/** Shifts grouped by location, as in the original PDF export. */
+/** Shifts grouped by location in the plan's location order, like the tables view. */
 export function buildLocationLists(plan: Plan): LocationList[] {
 	const people = lookup(plan.people);
-	return sortByName(plan.locations)
+	return plan.locations
 		.map((location) => ({
 			location,
-			entries: plan.shifts
-				.filter((s) => s.locationId === location.id)
-				.sort(compareShifts)
-				.map((s) => ({ from: s.from, to: s.to, person: people.get(s.personId)?.name ?? "?" })),
+			entries: shiftsOfLocation(plan, location.id).map((s) => ({
+				from: s.from,
+				to: s.to,
+				person: people.get(s.personId)?.name ?? "?",
+			})),
 		}))
 		.filter((list) => list.entries.length > 0);
 }

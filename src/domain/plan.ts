@@ -46,7 +46,7 @@ export function isDuplicateShift(shifts: readonly Shift[], candidate: Omit<Shift
 }
 
 export function shiftsOfLocation(plan: Plan, locationId: string): Shift[] {
-	return plan.shifts.filter((s) => s.locationId === locationId).sort(compareShifts);
+	return plan.shifts.filter((s) => s.locationId === locationId).sort(compareShiftsWithNames(plan));
 }
 
 export function shiftsInWindow(shifts: readonly Shift[], from: Hour, to: Hour): Shift[] {
@@ -55,6 +55,13 @@ export function shiftsInWindow(shifts: readonly Shift[], from: Hour, to: Hour): 
 
 export function compareShifts(a: Shift, b: Shift): number {
 	return a.from - b.from || a.to - b.to;
+}
+
+/** Orders by start, end and then person name, so shifts with equal times are listed alphabetically. */
+export function compareShiftsWithNames(plan: Plan): (a: Shift, b: Shift) => number {
+	const people = lookup(plan.people);
+	const name = (s: Shift) => people.get(s.personId)?.name ?? "";
+	return (a, b) => compareShifts(a, b) || name(a).localeCompare(name(b), "de");
 }
 
 export function lookup<T extends { id: string }>(items: readonly T[]): Map<string, T> {

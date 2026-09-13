@@ -1,6 +1,6 @@
 import { TriangleAlert } from "lucide-react";
 import { useState } from "react";
-import { shiftsInWindow } from "../domain/plan";
+import { compareShiftsWithNames, shiftsInWindow } from "../domain/plan";
 import { formatHour } from "../domain/time";
 import type { Hour } from "../domain/types";
 import { useDerived } from "./derived";
@@ -13,10 +13,7 @@ export function FilterView() {
 	const { plan, people, locations, conflicts, hourOptions, window } = useDerived();
 	const [from, setFrom] = useState<Hour>(window.startHour);
 	const [to, setTo] = useState<Hour>(Math.min(window.startHour + 2, window.endHour));
-	const hits = shiftsInWindow(plan.shifts, from, to).sort(
-		(a, b) =>
-			a.from - b.from || (people.get(a.personId)?.name ?? "").localeCompare(people.get(b.personId)?.name ?? "", "de"),
-	);
+	const hits = shiftsInWindow(plan.shifts, from, to).sort(compareShiftsWithNames(plan));
 
 	return (
 		<>

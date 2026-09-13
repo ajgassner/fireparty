@@ -36,16 +36,26 @@ describe("buildMatrix", () => {
 });
 
 describe("buildLocationLists", () => {
-	it("groups shifts by location sorted by name and start", () => {
-		expect(buildLocationLists(plan)).toEqual([
+	it("keeps the plan's location order and sorts shifts by time, then name", () => {
+		const withTie: Plan = {
+			...plan,
+			shifts: [
+				...plan.shifts,
+				{ id: "4", personId: "x", locationId: "b", from: 21, to: 23 },
+				{ id: "5", personId: "h", locationId: "b", from: 21, to: 23 },
+			],
+		};
+		expect(buildLocationLists(withTie)).toEqual([
+			{ location: { id: "s", name: "Schank" }, entries: [{ from: 20, to: 22, person: "STARKL Karl" }] },
 			{
 				location: { id: "b", name: "Bar" },
 				entries: [
+					{ from: 21, to: 23, person: "HUBER Stefan" },
 					{ from: 21, to: 23, person: "STARKL Karl" },
+					{ from: 21, to: 23, person: "ZAUNER Xaver" },
 					{ from: 22, to: 25, person: "HUBER Stefan" },
 				],
 			},
-			{ location: { id: "s", name: "Schank" }, entries: [{ from: 20, to: 22, person: "STARKL Karl" }] },
 		]);
 	});
 });
