@@ -42,58 +42,66 @@ function LocationCard({ location }: { location: Location }) {
 	const defaultFrom = 20 >= window.startHour && 20 < window.endHour ? 20 : window.startHour;
 
 	return (
-		<section className="flex flex-col overflow-clip rounded-lg border border-line bg-surface">
-			{/* header and column labels stick to the top while the card scrolls by */}
-			<div className="sticky top-0 z-10 rounded-t-lg bg-surface">
-				<header className="flex h-[52px] items-center gap-2 border-b border-line pr-3 pl-4">
-					<h3 className="truncate text-sm font-semibold">{location.name}</h3>
-					<span className="text-xs whitespace-nowrap text-muted">
-						{shifts.length === 1 ? "1 Schicht" : `${shifts.length} Schichten`}
-					</span>
-					<div className="flex-1" />
-					<button
-						type="button"
-						className="btn"
-						onClick={() =>
-							openDialog({
-								mode: "new",
-								locationId: location.id,
-								from: defaultFrom,
-								to: defaultFrom + DEFAULT_SHIFT_LENGTH,
-							})
-						}
-					>
-						<Plus className="size-[15px]" />
-						Schicht
-					</button>
-					<button
-						type="button"
-						className="btn px-2"
-						aria-label={`${location.name} als Excel exportieren`}
-						title="Als Excel exportieren"
-						onClick={() => exportLocationExcel(location.id)}
-					>
-						<Sheet className="size-[15px]" />
-					</button>
-				</header>
-				{shifts.length > 0 && (
-					<div className={`grid ${COLUMNS} gap-2 px-3 pt-2 pb-1 text-xs text-muted`}>
-						<span>Von</span>
-						<span>Bis</span>
-						<span>Person</span>
-						<span />
+		<section className="flex flex-col">
+			{/*
+			 * Header and column labels stick to the top while the card scrolls by. The wrapper reaches 8px above the
+			 * card and paints the canvas color behind the gap and the rounded corners, so rows scrolling underneath stay
+			 * hidden and the corners remain visible.
+			 */}
+			<div className="sticky -top-2 z-10 -mt-2 bg-[linear-gradient(var(--color-canvas)_0_16px,transparent_16px)] pt-2">
+				<div className="rounded-t-lg border-x border-t border-line bg-surface">
+					<header className="flex h-[52px] items-center gap-2 border-b border-line pr-3 pl-4">
+						<h3 className="truncate text-sm font-semibold">{location.name}</h3>
+						<span className="text-xs whitespace-nowrap text-muted">
+							{shifts.length === 1 ? "1 Schicht" : `${shifts.length} Schichten`}
+						</span>
+						<div className="flex-1" />
+						<button
+							type="button"
+							className="btn"
+							onClick={() =>
+								openDialog({
+									mode: "new",
+									locationId: location.id,
+									from: defaultFrom,
+									to: defaultFrom + DEFAULT_SHIFT_LENGTH,
+								})
+							}
+						>
+							<Plus className="size-[15px]" />
+							Schicht
+						</button>
+						<button
+							type="button"
+							className="btn px-2"
+							aria-label={`${location.name} als Excel exportieren`}
+							title="Als Excel exportieren"
+							onClick={() => exportLocationExcel(location.id)}
+						>
+							<Sheet className="size-[15px]" />
+						</button>
+					</header>
+					{shifts.length > 0 && (
+						<div className={`grid ${COLUMNS} gap-2 px-3 pt-2 pb-1 text-xs text-muted`}>
+							<span>Von</span>
+							<span>Bis</span>
+							<span>Person</span>
+							<span />
+						</div>
+					)}
+				</div>
+			</div>
+			<div className="rounded-b-lg border-x border-b border-line bg-surface">
+				{shifts.length === 0 ? (
+					<p className="px-4 py-5 text-[13px] text-muted">Noch keine Schichten.</p>
+				) : (
+					<div className="pb-2">
+						{shifts.map((shift) => (
+							<ShiftRow key={shift.id} shift={shift} />
+						))}
 					</div>
 				)}
 			</div>
-			{shifts.length === 0 ? (
-				<p className="px-4 py-5 text-[13px] text-muted">Noch keine Schichten.</p>
-			) : (
-				<div className="pb-2">
-					{shifts.map((shift) => (
-						<ShiftRow key={shift.id} shift={shift} />
-					))}
-				</div>
-			)}
 		</section>
 	);
 }

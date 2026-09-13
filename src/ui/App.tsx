@@ -127,7 +127,7 @@ function Planner() {
 				<Header />
 				<div className="flex min-h-0 flex-1">
 					<main className="flex min-h-0 min-w-0 flex-1 flex-col">
-						<div className="flex shrink-0 items-center gap-1 px-6 pt-5 pb-4">
+						<div className="flex shrink-0 items-center gap-1 px-6 pt-5 pb-2">
 							<div role="tablist" className="flex gap-1">
 								{VIEWS.map((v) => (
 									<button
@@ -151,7 +151,7 @@ function Planner() {
 							)}
 						</div>
 						{/* views scroll inside this area; timeline and filter scroll within their own card */}
-						<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 pb-5">
+						<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 pt-2 pb-5">
 							{view === "timeline" && <Timeline />}
 							{view === "tables" && <TablesView />}
 							{view === "filter" && <FilterView />}
