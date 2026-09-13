@@ -6,7 +6,7 @@ import type { Hour, Location, Shift } from "../domain/types";
 import { usePlanStore } from "../store";
 import { useDerived } from "./derived";
 import { report } from "./notify";
-import { useUi } from "./uiStore";
+import { type DropPreview, useUi } from "./uiStore";
 
 export const HOUR_WIDTH = 76;
 const LABEL_WIDTH = 132;
@@ -21,6 +21,20 @@ export const grab = { hours: 0 };
 
 /** Time of the last finished drag, to ignore the click that follows a drop. */
 export const lastDrag = { endedAt: 0 };
+
+const PREVIEW_ID = "preview";
+
+/**
+ * The shifts as they will be after the pending drop – the moved shift keeps its array position (like updateShift),
+ * a new one is appended (like addShift). Laying out this list gives exactly the lanes the plan will have afterwards.
+ */
+function projectShifts(shifts: readonly Shift[], preview: DropPreview | null): readonly Shift[] {
+	if (!preview) return shifts;
+	const { personId, locationId, from, to, shiftId } = preview;
+	return shiftId
+		? shifts.map((s) => (s.id === shiftId ? { ...s, locationId, from, to } : s))
+		: [...shifts, { id: PREVIEW_ID, personId, locationId, from, to }];
+}
 
 /** Assigns overlapping shifts of one location to separate lanes. */
 function assignLanes(shifts: Shift[]): { lanes: number; laneOf: Map<string, number> } {
@@ -85,11 +99,12 @@ export function Timeline() {
 
 function LocationRow({ location, startHour, hours }: { location: Location; startHour: Hour; hours: Hour[] }) {
 	const plan = usePlanStore((s) => s.plan);
-	const preview = useUi((s) => (s.dropPreview?.locationId === location.id ? s.dropPreview : null));
+	const preview = useUi((s) => s.dropPreview);
 	const shifts = plan.shifts.filter((s) => s.locationId === location.id);
-	const { lanes, laneOf } = assignLanes(shifts);
-	const previewLane = preview ? assignLanes([...shifts, { ...preview, id: "preview", personId: "" }]) : null;
-	const laneCount = Math.max(lanes, previewLane?.lanes ?? 0);
+	const projected = projectShifts(plan.shifts, preview).filter((s) => s.locationId === location.id);
+	const { lanes, laneOf } = assignLanes(projected);
+	const placeholder =
+		preview?.locationId === location.id ? projected.find((s) => s.id === (preview.shiftId ?? PREVIEW_ID)) : undefined;
 	const midnightOffsets = hours.filter((h) => h % 24 === 0 && h !== startHour).map((h) => (h - startHour) * HOUR_WIDTH);
 
 	return (
@@ -102,10 +117,10 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 				<span className="text-xs text-muted">{shifts.length === 1 ? "1 Schicht" : `${shifts.length} Schichten`}</span>
 			</div>
 			<div
-				className="relative"
+				className="relative transition-[height] duration-150"
 				style={{
 					width: hours.length * HOUR_WIDTH,
-					height: laneCount * LANE_HEIGHT + ROW_PADDING * 2,
+					height: lanes * LANE_HEIGHT + ROW_PADDING * 2,
 					backgroundImage: `repeating-linear-gradient(to right, transparent 0 ${HOUR_WIDTH - 1}px, var(--color-line) ${HOUR_WIDTH - 1}px ${HOUR_WIDTH}px)`,
 				}}
 			>
@@ -116,15 +131,24 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 					<DropCell key={h} locationId={location.id} hour={h} left={(h - startHour) * HOUR_WIDTH} />
 				))}
 				{shifts.map((shift) => (
-					<ShiftBlock key={shift.id} shift={shift} startHour={startHour} lane={laneOf.get(shift.id) ?? 0} />
+					<ShiftBlock
+						key={shift.id}
+						shift={shift}
+						startHour={startHour}
+						// the moved shift stays mounted (dnd-kit needs its node) but is hidden while the placeholder shows it
+						hidden={preview?.shiftId === shift.id}
+						lane={laneOf.get(shift.id) ?? 0}
+					/>
 				))}
-				{preview && previewLane && (
+				{placeholder && preview && (
 					<div
-						className="pointer-events-none absolute flex flex-col justify-center rounded-md border-[1.5px] border-dashed border-faint bg-canvas px-2.5"
-						style={geometry(preview.from, preview.to, startHour, previewLane.laneOf.get("preview") ?? 0)}
+						className="pointer-events-none absolute z-[2] flex flex-col justify-center gap-px rounded-md border-[1.5px] border-dashed border-line-strong bg-soft/60 px-2.5 transition-[top] duration-150"
+						style={geometry(placeholder.from, placeholder.to, startHour, laneOf.get(placeholder.id) ?? 0)}
 					>
-						<span className="truncate text-xs text-muted">{preview.label} hier ablegen</span>
-						<span className="font-mono text-[11px] text-muted">{formatShortRange(preview.from, preview.to)}</span>
+						<span className="truncate text-[13px] font-medium text-muted">{preview.label}</span>
+						<span className="font-mono text-[11px] text-muted">
+							{formatShortRange(placeholder.from, placeholder.to)}
+						</span>
 					</div>
 				)}
 			</div>
@@ -149,7 +173,17 @@ function DropCell({ locationId, hour, left }: { locationId: string; hour: Hour; 
 	return <div ref={setNodeRef} className="absolute inset-y-0" style={{ left, width: HOUR_WIDTH }} />;
 }
 
-function ShiftBlock({ shift, startHour, lane }: { shift: Shift; startHour: Hour; lane: number }) {
+function ShiftBlock({
+	shift,
+	startHour,
+	lane,
+	hidden,
+}: {
+	shift: Shift;
+	startHour: Hour;
+	lane: number;
+	hidden: boolean;
+}) {
 	const { people, conflicts, describeConflicts } = useDerived();
 	const updateShift = usePlanStore((s) => s.updateShift);
 	const openDialog = useUi((s) => s.openDialog);
@@ -203,9 +237,9 @@ function ShiftBlock({ shift, startHour, lane }: { shift: Shift; startHour: Hour;
 			onClick={() => {
 				if (Date.now() - lastDrag.endedAt > 150) openDialog({ mode: "edit", shiftId: shift.id });
 			}}
-			className={`group absolute z-[1] flex cursor-grab touch-none flex-col justify-center gap-px overflow-hidden rounded-md border px-2.5 text-left transition-opacity select-none focus-visible:outline-2 focus-visible:outline-ink ${
+			className={`group absolute z-[1] flex cursor-grab touch-none flex-col justify-center gap-px overflow-hidden rounded-md border px-2.5 text-left select-none focus-visible:outline-2 focus-visible:outline-ink ${
 				conflictWith ? "border-alarm bg-alarm-block" : "border-soft-line bg-soft hover:border-line-strong"
-			} ${isDragging ? "opacity-40" : dimmed ? "opacity-30" : ""} ${resize ? "z-10 shadow-md" : ""}`}
+			} ${hidden ? "invisible" : isDragging ? "opacity-40" : dimmed ? "opacity-30" : ""} ${resize ? "z-10 shadow-md" : "transition-[top,opacity] duration-150"}`}
 			style={geometry(from, to, startHour, lane)}
 		>
 			<span className="flex min-w-0 items-center gap-1.5">

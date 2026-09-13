@@ -9,9 +9,12 @@ export type ShiftDraft =
 	| { mode: "new"; locationId?: string; personId?: string; from: Hour; to: Hour };
 
 export interface DropPreview {
+	personId: string;
 	locationId: string;
 	from: Hour;
 	to: Hour;
+	/** set when an existing shift is moved, unset when a person is dropped */
+	shiftId?: string;
 	label: string;
 }
 
