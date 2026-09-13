@@ -1,6 +1,7 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { TriangleAlert } from "lucide-react";
 import { type PointerEvent, useState } from "react";
+import { type ConflictMap, computeConflicts } from "../domain/conflicts";
 import { formatHour, formatShortRange, range } from "../domain/time";
 import type { Hour, Location, Shift } from "../domain/types";
 import { usePlanStore } from "../store";
@@ -34,6 +35,22 @@ function projectShifts(shifts: readonly Shift[], preview: DropPreview | null): r
 	return shiftId
 		? shifts.map((s) => (s.id === shiftId ? { ...s, locationId, from, to } : s))
 		: [...shifts, { id: PREVIEW_ID, personId, locationId, from, to }];
+}
+
+// conflicts of the projected plan, computed once per preview (the plan does not change while dragging)
+const previewConflicts = new WeakMap<DropPreview, ConflictMap>();
+
+/** Conflicts to display: those of the pending drop result while dragging, otherwise those of the plan. */
+function useConflicts(): ConflictMap {
+	const { plan, conflicts } = useDerived();
+	const preview = useUi((s) => s.dropPreview);
+	if (!preview) return conflicts;
+	let result = previewConflicts.get(preview);
+	if (!result) {
+		result = computeConflicts(projectShifts(plan.shifts, preview));
+		previewConflicts.set(preview, result);
+	}
+	return result;
 }
 
 /** Assigns overlapping shifts of one location to separate lanes. */
@@ -111,6 +128,8 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 	);
 	const placeholder =
 		preview?.locationId === location.id ? projected.find((s) => s.id === (preview.shiftId ?? PREVIEW_ID)) : undefined;
+	const conflicts = useConflicts();
+	const placeholderConflict = placeholder !== undefined && conflicts.has(placeholder.id);
 	const midnightOffsets = hours.filter((h) => h % 24 === 0 && h !== startHour).map((h) => (h - startHour) * HOUR_WIDTH);
 
 	return (
@@ -148,13 +167,18 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 				))}
 				{placeholder && preview && (
 					<div
-						className="pointer-events-none absolute z-[2] flex flex-col justify-center gap-px rounded-md border-[1.5px] border-dashed border-line-strong bg-soft/60 px-2.5 transition-[top] duration-150"
+						className={`pointer-events-none absolute z-[2] flex flex-col justify-center gap-px rounded-md border-[1.5px] border-dashed px-2.5 transition-[top] duration-150 ${
+							placeholderConflict
+								? "border-alarm bg-alarm-block/70 text-alarm"
+								: "border-line-strong bg-soft/60 text-muted"
+						}`}
 						style={geometry(placeholder.from, placeholder.to, startHour, laneOf.get(placeholder.id) ?? 0)}
 					>
-						<span className="truncate text-[13px] font-medium text-muted">{preview.label}</span>
-						<span className="font-mono text-[11px] text-muted">
-							{formatShortRange(placeholder.from, placeholder.to)}
+						<span className="flex min-w-0 items-center gap-1.5 text-[13px] font-medium">
+							{placeholderConflict && <TriangleAlert className="size-3.5 shrink-0" />}
+							<span className="truncate">{preview.label}</span>
 						</span>
+						<span className="font-mono text-[11px]">{formatShortRange(placeholder.from, placeholder.to)}</span>
 					</div>
 				)}
 			</div>
@@ -190,7 +214,8 @@ function ShiftBlock({
 	lane: number;
 	hidden: boolean;
 }) {
-	const { people, conflicts, describeConflicts } = useDerived();
+	const { people, describeConflicts } = useDerived();
+	const conflicts = useConflicts();
 	const updateShift = usePlanStore((s) => s.updateShift);
 	const openDialog = useUi((s) => s.openDialog);
 	const highlight = useUi((s) => s.highlightPersonId);
