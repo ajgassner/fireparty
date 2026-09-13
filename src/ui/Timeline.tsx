@@ -103,6 +103,12 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 	const shifts = plan.shifts.filter((s) => s.locationId === location.id);
 	const projected = projectShifts(plan.shifts, preview).filter((s) => s.locationId === location.id);
 	const { lanes, laneOf } = assignLanes(projected);
+	// DOM order = keyboard tab order: by time, then top to bottom. Based on the committed layout, so nodes are not
+	// reordered while dragging.
+	const committed = assignLanes(shifts).laneOf;
+	const tabOrder = [...shifts].sort(
+		(a, b) => a.from - b.from || (committed.get(a.id) ?? 0) - (committed.get(b.id) ?? 0),
+	);
 	const placeholder =
 		preview?.locationId === location.id ? projected.find((s) => s.id === (preview.shiftId ?? PREVIEW_ID)) : undefined;
 	const midnightOffsets = hours.filter((h) => h % 24 === 0 && h !== startHour).map((h) => (h - startHour) * HOUR_WIDTH);
@@ -130,7 +136,7 @@ function LocationRow({ location, startHour, hours }: { location: Location; start
 				{hours.map((h) => (
 					<DropCell key={h} locationId={location.id} hour={h} left={(h - startHour) * HOUR_WIDTH} />
 				))}
-				{shifts.map((shift) => (
+				{tabOrder.map((shift) => (
 					<ShiftBlock
 						key={shift.id}
 						shift={shift}
