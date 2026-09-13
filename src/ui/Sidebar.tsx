@@ -23,7 +23,7 @@ export function Sidebar() {
 	const setTab = useUi((s) => s.setSideTab);
 
 	return (
-		<aside className="flex min-h-0 flex-col border-line bg-surface max-lg:border-t lg:w-80 lg:shrink-0 lg:border-l">
+		<aside className="flex min-h-0 w-72 shrink-0 flex-col border-l border-line bg-surface lg:w-80">
 			<div role="tablist" className="flex h-12 shrink-0 items-end gap-5 border-b border-line px-5 text-[13px]">
 				{TABS.map((t) => (
 					<button

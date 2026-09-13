@@ -125,7 +125,7 @@ function Planner() {
 		>
 			<div className="flex h-full flex-col">
 				<Header />
-				<div className="flex min-h-0 flex-1 max-lg:flex-col">
+				<div className="flex min-h-0 flex-1">
 					<main className="flex min-h-0 min-w-0 flex-1 flex-col">
 						<div className="flex shrink-0 items-center gap-1 px-6 pt-5 pb-4">
 							<div role="tablist" className="flex gap-1">
