@@ -48,24 +48,24 @@ export function FilterView() {
 					{hits.length === 1 ? "1 Einteilung" : `${hits.length} Einteilungen`} im Zeitraum
 				</span>
 			</div>
-			<div className="shrink-0 overflow-hidden rounded-lg border border-line bg-surface">
-				<div className={`grid ${COLUMNS} h-[38px] items-center gap-4 px-4 text-xs text-muted`}>
+			<div className="min-h-0 overflow-auto rounded-lg border border-line bg-surface">
+				<div
+					className={`sticky top-0 z-10 grid ${COLUMNS} h-[38px] items-center gap-4 border-b border-line bg-surface px-4 text-xs text-muted`}
+				>
 					<span>Name</span>
 					<span>Standort</span>
 					<span>Von</span>
 					<span>Bis</span>
 				</div>
 				{hits.length === 0 && (
-					<p className="border-t border-line px-4 py-5 text-[13px] text-muted">
-						In diesem Zeitraum ist niemand eingeteilt.
-					</p>
+					<p className="px-4 py-5 text-[13px] text-muted">In diesem Zeitraum ist niemand eingeteilt.</p>
 				)}
 				{hits.map((s) => {
 					const conflict = conflicts.has(s.id);
 					return (
 						<div
 							key={s.id}
-							className={`grid ${COLUMNS} h-11 items-center gap-4 border-t border-line px-4 ${conflict ? "bg-alarm-soft" : ""}`}
+							className={`grid ${COLUMNS} h-11 items-center gap-4 border-b border-line px-4 last:border-b-0 ${conflict ? "bg-alarm-soft" : ""}`}
 						>
 							<span
 								className={`flex min-w-0 items-center gap-1.5 text-[13px] font-medium ${conflict ? "text-alarm" : ""}`}

@@ -38,7 +38,7 @@ export function Sidebar() {
 					</button>
 				))}
 			</div>
-			<div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+			<div className="flex min-h-0 flex-1 flex-col">
 				{tab === "people" && <PeopleTab />}
 				{tab === "locations" && <LocationsTab />}
 				{tab === "settings" && <SettingsTab />}
@@ -54,7 +54,7 @@ function AddForm({ placeholder, onAdd }: { placeholder: string; onAdd: (name: st
 		if (report(onAdd(name))) setName("");
 	};
 	return (
-		<form onSubmit={submit} className="flex gap-2 px-5 pt-4 pb-2">
+		<form onSubmit={submit} className="flex shrink-0 gap-2 px-5 pt-4 pb-2">
 			<input className="field" placeholder={placeholder} value={name} onChange={(e) => setName(e.target.value)} />
 			<button type="submit" aria-label="Hinzufügen" className="btn btn-primary w-[34px] justify-center px-0">
 				<Plus className="size-4" />
@@ -120,13 +120,13 @@ function PeopleTab() {
 			{plan.people.length === 0 ? (
 				<p className="px-5 py-3 text-[13px] text-muted">Noch keine Personen.</p>
 			) : (
-				<ul className="flex flex-col gap-0.5 px-2.5 py-1">
+				<ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-1 *:shrink-0">
 					{sortByName(plan.people).map((p) => (
 						<PersonRow key={p.id} personId={p.id} />
 					))}
 				</ul>
 			)}
-			<p className="mt-auto border-t border-line px-5 py-4 text-xs text-pretty text-muted">
+			<p className="mt-auto shrink-0 border-t border-line px-5 py-4 text-xs text-pretty text-muted">
 				In die Zeitleiste ziehen, um eine Schicht anzulegen.
 			</p>
 		</>
@@ -198,7 +198,7 @@ function LocationsTab() {
 			{plan.locations.length === 0 ? (
 				<p className="px-5 py-3 text-[13px] text-muted">Noch keine Standorte.</p>
 			) : (
-				<ul className="flex flex-col gap-0.5 px-2.5 py-1">
+				<ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-1 *:shrink-0">
 					{plan.locations.map((location, index) => {
 						const count = plan.shifts.filter((s) => s.locationId === location.id).length;
 						return (
@@ -240,7 +240,7 @@ function LocationsTab() {
 					})}
 				</ul>
 			)}
-			<p className="mt-auto border-t border-line px-5 py-4 text-xs text-pretty text-muted">
+			<p className="mt-auto shrink-0 border-t border-line px-5 py-4 text-xs text-pretty text-muted">
 				Die Reihenfolge gilt für Zeitleiste und Tabellen. Doppelklick auf einen Namen zum Umbenennen.
 			</p>
 		</>
@@ -257,7 +257,7 @@ function SettingsTab() {
 	};
 
 	return (
-		<div className="flex flex-col gap-5 p-5">
+		<div className="flex min-h-0 flex-col gap-5 overflow-y-auto p-5">
 			<label className="flex flex-col gap-1.5">
 				<span className="label">Name des Plans</span>
 				<input
