@@ -15,6 +15,15 @@ export interface DropPreview {
 	label: string;
 }
 
+export interface FilterState {
+	personId: string | null;
+	locationId: string | null;
+	/** null = whole plan window, follows changes of the window */
+	range: { from: Hour; to: Hour } | null;
+}
+
+export const EMPTY_FILTER: FilterState = { personId: null, locationId: null, range: null };
+
 interface UiState {
 	view: View;
 	setView: (view: View) => void;
@@ -28,6 +37,9 @@ interface UiState {
 	closeDialog: () => void;
 	dropPreview: DropPreview | null;
 	setDropPreview: (preview: DropPreview | null) => void;
+	/** kept here so the filter survives switching views */
+	filter: FilterState;
+	setFilter: (changes: Partial<FilterState>) => void;
 }
 
 export const useUi = create<UiState>()((set) => ({
@@ -42,4 +54,6 @@ export const useUi = create<UiState>()((set) => ({
 	closeDialog: () => set({ dialog: null }),
 	dropPreview: null,
 	setDropPreview: (dropPreview) => set({ dropPreview }),
+	filter: EMPTY_FILTER,
+	setFilter: (changes) => set((s) => ({ filter: { ...s.filter, ...changes } })),
 }));
