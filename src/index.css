@@ -34,11 +34,14 @@
 @layer base {
 	:root {
 		color-scheme: light;
+		/* chevron for selects, colored like --color-faint (data URIs cannot use currentColor) */
+		--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239d9792' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 	}
 }
 
 :root[data-theme="dark"] {
 	color-scheme: dark;
+	--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23787370' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 	--color-ink: oklch(0.93 0.006 60);
 	--color-on-ink: oklch(0.19 0.006 60);
 	--color-muted: oklch(0.72 0.008 60);
@@ -84,6 +87,13 @@ body {
 	}
 	.field {
 		@apply h-[34px] w-full min-w-0 rounded-md border border-line bg-surface px-2.5 text-[13px] text-ink placeholder:text-faint focus:border-ink/40 focus:outline-2 focus:outline-offset-0 focus:outline-soft;
+	}
+	/* own chevron instead of the native arrow, which sits too close to the right edge */
+	select.field {
+		@apply appearance-none bg-no-repeat pr-8;
+		background-image: var(--select-arrow);
+		background-position: right 8px center;
+		background-size: 14px;
 	}
 	.label {
 		@apply text-xs font-medium text-muted;
